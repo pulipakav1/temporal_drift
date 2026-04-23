@@ -42,7 +42,14 @@ Results are written to `artifacts/results/` with config-hashed filenames for rep
 ## Multi-GPU Launch
 
 ```bash
-torchrun --nproc_per_node=4 main.py --mode train --config driftllm/configs/config.yaml
+accelerate launch --num_processes 4 main.py --mode full --config driftllm/configs/config.yaml
+```
+
+Convenience scripts are also provided:
+
+```bash
+bash scripts/run_financial_accelerate.sh
+bash scripts/run_clinical_accelerate.sh
 ```
 
 ## Core Metrics Reported

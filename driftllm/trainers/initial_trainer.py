@@ -16,6 +16,8 @@ class InitialTrainer:
         model, tok = load_model_tokenizer(
             self.cfg["model"]["name"], n_labels, self.cfg["model"]["bf16"], self.cfg["model"]["device_map"]
         )
+        target_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = model.to(target_device)
         device = next(model.parameters()).device
         train_rows = [dict(x) for x in splits["train"]]
         val_rows = [dict(x) for x in splits["validation"]]
