@@ -34,6 +34,9 @@ class LayerSensitivityAnalyzer:
         return {k: v / max(1, n_batches) for k, v in scores.items()}
 
     def select_layers(self, fisher: Dict[str, float], drift_type: str) -> List[str]:
+        fisher = {k: v for k, v in fisher.items() if "lora_" in k}
+        if not fisher:
+            return []
         keys = self.DRIFT_TYPE_MODULES[drift_type]
         filt = {k: v for k, v in fisher.items() if any(x in k for x in keys)}
         ranked = sorted(filt.items(), key=lambda x: x[1], reverse=True)
