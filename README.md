@@ -1,0 +1,80 @@
+# DriftLLM: Drift-Type-Aware Selective LoRA Adaptation
+
+DriftLLM is a research and deployment-oriented framework for detecting drift in streamed task inputs and performing selective LoRA adaptation with forgetting-aware regularization.
+
+## Model Choice Justification: Qwen2.5-7B-Instruct
+
+- Strong financial language understanding relative to similarly sized open alternatives.
+- Better text-number tokenization behavior for tickers, rates, and mixed numeric phrases.
+- Good LoRA sample efficiency for rapid post-drift adaptation.
+- Stable BF16 execution in multi-GPU settings.
+- Practical fit for 4 x A100 80GB setup with ZeRO-3 style distributed training.
+
+## Implemented Contributions
+
+- C1: Drift taxonomy and detectors:
+  - `semantic_drift` (embedding-space MMD),
+  - `label_drift` (ADWIN on label stream),
+  - `knowledge_drift` (probe perplexity monitoring).
+- C2: Fisher-guided layer sensitivity and selective adaptation routing.
+- C3: EWC + replay regularization and theoretical forgetting bound checks.
+- C4: DriftLLM-Eval scaffold (temporal splits, event annotations, streaming evaluation protocol).
+
+## Environment Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+## Reproducible Entry Points
+
+- Financial full pipeline:
+  - `bash scripts/run_financial.sh`
+- Clinical full pipeline:
+  - `bash scripts/run_clinical.sh`
+- Baseline suite:
+  - `bash scripts/run_baselines.sh`
+- Ablations:
+  - `bash scripts/run_ablations.sh`
+
+Results are written to `artifacts/results/` with config-hashed filenames for reproducibility.
+
+## Multi-GPU Launch
+
+```bash
+torchrun --nproc_per_node=4 main.py --mode train --config driftllm/configs/config.yaml
+```
+
+## Core Metrics Reported
+
+- Stream accuracy (rolling and overall),
+- Macro and weighted F1,
+- Drift detection precision/recall/F1 + delay,
+- Forgetting delta and mean forgetting,
+- Recovery speed (steps to 90% of pre-drift performance),
+- Theoretical forgetting bound violation rate,
+- Parameter/computation efficiency (`n_param_updates`, adaptation time).
+
+## Reproducibility Protocol
+
+- Fixed random seeding across `torch`, `numpy`, and `random`.
+- Multi-seed execution via `experiment.seeds` in config.
+- Config overrides supported through CLI:
+  - `python main.py --config driftllm/configs/config.yaml --set layer_selection.top_k=16 --set forgetting.ewc_lambda=1.0`
+- Optional Weights & Biases logging:
+  - `--set experiment.use_wandb=true`
+  - run naming follows `{domain}_{method}_{seed}_{timestamp}`.
+
+## Dataset Notes
+
+- Financial primary dataset loads from `takala/financial_phrasebank` (`sentences_allagree`) with pseudo-temporal assignment and event-specific drift injections.
+- Clinical secondary dataset expects local MIMIC-style CSV configured via `paths.mimic_path`.
+- MIMIC-III requires authorized access and proper credentialing; this repository does not ship restricted data.
+
+## Paper Figure Generation
+
+```bash
+python scripts/plot_results.py
+```
+
+Saves publication figures in both PNG and PDF at 300 DPI under `artifacts/plots/`.

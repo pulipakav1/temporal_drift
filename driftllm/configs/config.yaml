@@ -1,0 +1,71 @@
+model:
+  name: "Qwen/Qwen2.5-7B-Instruct"
+  num_labels_financial: 3
+  num_labels_clinical: 50
+  bf16: true
+  device_map: "auto"
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+training:
+  lr: 2.0e-4
+  batch_size: 32
+  grad_accum: 4
+  max_steps: 3000
+  initial_epochs: 3
+  early_stopping_patience: 5
+  gradient_clip: 1.0
+  checkpoint_every_steps: 500
+  adaptation_steps: 50
+  deepspeed:
+    zero_optimization:
+      stage: 3
+      offload_optimizer:
+        device: "cpu"
+    bf16:
+      enabled: true
+    gradient_clipping: 1.0
+    train_micro_batch_size_per_gpu: 8
+    gradient_accumulation_steps: 4
+
+drift:
+  mmd_threshold: 0.05
+  adwin_delta: 0.002
+  window_size: 500
+  reference_size: 1000
+  min_samples: 200
+  cooldown: 300
+  check_every_steps: 50
+
+layer_selection:
+  method: "fisher"
+  top_k: 8
+  fisher_samples: 128
+  min_fisher_score: 0.0
+
+forgetting:
+  ewc_lambda: 0.5
+  replay_buffer: 512
+  max_forgetting: 0.05
+
+experiment:
+  domain: "financial"
+  seed: 42
+  seeds: [42, 52, 62]
+  run_name_prefix: "driftllm"
+  wandb_project: "driftllm"
+  wandb_entity: null
+  use_wandb: false
+  timestamp_results: true
+
+paths:
+  data_root: "./artifacts/data"
+  financial_cache: "./artifacts/data/financial_hf"
+  mimic_path: "./artifacts/data/mimic_iii.csv"
+  model_dir: "./artifacts/models"
+  results_dir: "./artifacts/results"
+  plots_dir: "./artifacts/plots"

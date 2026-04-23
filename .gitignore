@@ -1,0 +1,35 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local/generated experiment outputs
+artifacts/data/
+artifacts/models/
+artifacts/results/
+artifacts/checkpoints/
+artifacts/plots/
+
+# Logs and local run state
+*.log
+wandb/
+runs/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets or machine-local config
+.env
+.env.*
+*.key

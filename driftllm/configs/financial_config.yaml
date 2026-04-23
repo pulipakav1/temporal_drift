@@ -1,0 +1,7 @@
+experiment:
+  domain: "financial"
+
+dataset:
+  source: "financial_phrasebank"
+  fiqa_path: "./artifacts/data/fiqa_2018.csv"
+  news_path: "./artifacts/data/financial_news.csv"
