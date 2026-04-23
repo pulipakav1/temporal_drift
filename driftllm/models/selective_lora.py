@@ -83,7 +83,16 @@ class SelectiveLoRAModel:
         layers = self.analyzer.select_layers(fisher, drift_event.drift_type)
         n_upd, n_upd_params = self.unfreeze_selected_layers(layers)
         total_lora_params = sum(p.numel() for n, p in self.model.named_parameters() if "lora_" in n)
-        opt = torch.optim.AdamW(filter(lambda p: p.requires_grad, self.model.parameters()), lr=self.cfg["training"]["lr"])
+        trainable_params = [p for p in self.model.parameters() if p.requires_grad]
+        if not trainable_params:
+            return {
+                "timing": time.time() - t0,
+                "avg_loss": 0.0,
+                "n_layers_updated": 0,
+                "n_params_updated": 0,
+                "pct_lora_params_updated": 0.0,
+            }
+        opt = torch.optim.AdamW(trainable_params, lr=self.cfg["training"]["lr"])
         losses = []
         for step, batch in enumerate(dataloader):
             if step >= n_steps:
@@ -91,14 +100,15 @@ class SelectiveLoRAModel:
             batch = {k: v.to(device) for k, v in batch.items()}
             out = self.model(**batch)
             ewc = self.forgetting_reg.ewc_loss(self.model)
-            replay_batch = self.forgetting_reg.get_replay_batch(batch_size=min(32, len(self.forgetting_reg.replay_buffer)))
+            replay_size = min(int(batch["labels"].shape[0]), len(self.forgetting_reg.replay_buffer))
+            replay_batch = self.forgetting_reg.get_replay_batch(batch_size=replay_size)
             replay_loss = 0.0
             if replay_batch is not None:
                 replay_batch = {k: v.to(device) for k, v in replay_batch.items()}
                 replay_loss = self.model(**replay_batch).loss
             loss = out.loss + ewc + 0.3 * replay_loss
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(trainable_params, 1.0)
             opt.step()
             opt.zero_grad(set_to_none=True)
             losses.append(loss.item())

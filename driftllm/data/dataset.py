@@ -18,7 +18,7 @@ def load_financial_dataset(cache_dir: str, seed: int = 42) -> DatasetDict:
     cache = Path(cache_dir)
     if cache.exists():
         return load_from_disk(str(cache))
-    ds = load_dataset("takala/financial_phrasebank", "sentences_allagree")["train"]
+    ds = load_dataset("takala/financial_phrasebank", "sentences_allagree", trust_remote_code=True)["train"]
     ds = ds.rename_column("sentence", "text")
     ds = ds.add_column("date", _pseudo_dates(len(ds)))
     ds = ds.add_column("source", ["financial_phrasebank"] * len(ds))

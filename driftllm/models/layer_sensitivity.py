@@ -17,11 +17,13 @@ class LayerSensitivityAnalyzer:
 
     def compute_fisher(self, model, dataloader, n_samples: int = 128) -> Dict[str, float]:
         model.train()
+        device = next(model.parameters()).device
         scores = defaultdict(float)
         n_batches = 0
         for batch in dataloader:
             if n_batches * len(batch["labels"]) >= n_samples:
                 break
+            batch = {k: v.to(device) for k, v in batch.items()}
             out = model(**batch)
             out.loss.backward()
             for n, p in model.named_parameters():
@@ -36,5 +38,8 @@ class LayerSensitivityAnalyzer:
         filt = {k: v for k, v in fisher.items() if any(x in k for x in keys)}
         ranked = sorted(filt.items(), key=lambda x: x[1], reverse=True)
         selected = [k for k, v in ranked if v > self.min_score][: self.top_k]
-        print(f"[LayerSensitivity] drift_type={drift_type} selected={[(k, filt[k]) for k in selected]}")
+        if not selected:
+            fallback = sorted(fisher.items(), key=lambda x: x[1], reverse=True)
+            selected = [k for k, v in fallback if v > self.min_score][: self.top_k]
+        print(f"[LayerSensitivity] drift_type={drift_type} selected={[(k, fisher[k]) for k in selected]}")
         return selected

@@ -20,10 +20,11 @@ class InitialTrainer:
         model = model.to(target_device)
         for name, param in model.named_parameters():
             param.requires_grad = any(key in name for key in ("score", "classifier"))
+        trainable_params = [p for p in model.parameters() if p.requires_grad]
         device = next(model.parameters()).device
         train_rows = [dict(x) for x in splits["train"]]
         val_rows = [dict(x) for x in splits["validation"]]
-        opt = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad), lr=self.cfg["training"]["lr"])
+        opt = torch.optim.AdamW(trainable_params, lr=self.cfg["training"]["lr"])
         patience = int(self.cfg["training"]["early_stopping_patience"])
         best_val = -1.0
         bad_epochs = 0
@@ -39,7 +40,7 @@ class InitialTrainer:
                 labels = torch.tensor([int(row["label"])], device=device)
                 loss = model(**enc, labels=labels).loss
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), float(self.cfg["training"]["gradient_clip"]))
+                torch.nn.utils.clip_grad_norm_(trainable_params, float(self.cfg["training"]["gradient_clip"]))
                 opt.step()
                 opt.zero_grad(set_to_none=True)
             model.eval()

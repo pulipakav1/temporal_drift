@@ -27,4 +27,6 @@ def load_model_tokenizer(
         tok.pad_token = tok.eos_token
     if getattr(model.config, "pad_token_id", None) is None:
         model.config.pad_token_id = tok.pad_token_id
+    if hasattr(model.config, "use_cache"):
+        model.config.use_cache = False
     return model, tok
