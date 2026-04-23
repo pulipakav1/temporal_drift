@@ -58,6 +58,13 @@ def main() -> None:
     parser.add_argument("--config", type=str, default="driftllm/configs/config.yaml")
     parser.add_argument("--mode", type=str, choices=["data", "train", "eval", "full"], default="full")
     parser.add_argument("--baseline", action="store_true")
+    parser.add_argument(
+        "--method",
+        type=str,
+        choices=["selective", "no_update", "full_lora", "oracle", "no_ewc"],
+        default="selective",
+        help="Run one method at a time for reproducible experiment matrices.",
+    )
     parser.add_argument("--tag", type=str, default="default")
     parser.add_argument("--set", action="append", default=[], help="Override config using key=value (supports nested keys).")
     args = parser.parse_args()
@@ -81,12 +88,22 @@ def main() -> None:
         seed_everything(int(seed))
         if args.mode in {"train", "full"}:
             InitialTrainer(run_cfg).run()
-        method = "baseline" if args.baseline else "selective"
+        method = "baseline" if args.baseline else args.method
         wb = _maybe_init_wandb(run_cfg, method=method, seed=int(seed))
         if args.baseline:
             result = run_baselines(run_cfg)
         else:
-            result = OnlineDriftTrainer(run_cfg).run()
+            trainer_mode = {
+                "selective": "selective",
+                "no_update": "no_update",
+                "full_lora": "full_retrain",
+                "oracle": "oracle",
+                "no_ewc": "selective",
+            }[args.method]
+            if args.method == "no_ewc":
+                run_cfg["forgetting"]["ewc_lambda"] = 0.0
+            result = OnlineDriftTrainer(run_cfg, mode=trainer_mode).run()
+            result["method"] = args.method
         if wb is not None:
             try:
                 wb.log({k: v for k, v in result.items() if isinstance(v, (int, float))})

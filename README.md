@@ -85,3 +85,25 @@ python scripts/plot_results.py
 ```
 
 Saves publication figures in both PNG and PDF at 300 DPI under `artifacts/plots/`.
+
+## Experiment Matrix
+
+Generate the 60-run paper matrix:
+
+```bash
+python scripts/generate_run_matrix.py --output scripts/run_matrix_60.sh
+```
+
+The default matrix is:
+
+- 2 domains: financial and clinical,
+- 3 seeds: 42, 52, 62,
+- 10 settings: selective EWC, no update, full LoRA, oracle, no EWC, top-k 4, top-k 16, replay 128, replay 0, and MMD threshold 0.02.
+
+Run the generated script from the repository root:
+
+```bash
+bash scripts/run_matrix_60.sh
+```
+
+Clinical runs require a MIMIC-style CSV at `paths.mimic_path` with note/timestamp/code columns.
