@@ -25,4 +25,6 @@ def load_model_tokenizer(
     tok = AutoTokenizer.from_pretrained(model_source, use_fast=True)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
+    if getattr(model.config, "pad_token_id", None) is None:
+        model.config.pad_token_id = tok.pad_token_id
     return model, tok
