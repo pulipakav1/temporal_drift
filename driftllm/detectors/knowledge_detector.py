@@ -34,11 +34,23 @@ ARXIV_PROBES: List[str] = [
     "Research trends on arXiv shift over time as new methods become popular.",
 ]
 
+TWEET_PROBES: List[str] = [
+    "Social media sentiment changes quickly around major global events.",
+    "Hashtags often encode current topics and community identity.",
+    "Short posts can carry strong sentiment with little context.",
+    "Election periods tend to increase polarization in online language.",
+    "Public discourse around AI surged after late 2022.",
+    "Breaking news can shift sentiment distributions within days.",
+    "Platform-specific slang evolves quickly over time.",
+]
+
 
 class KnowledgeDriftDetector(BaseDriftDetector):
     def __init__(self, domain: str, threshold_pct: float = 0.20):
         if domain == "financial":
             self.probes = FIN_PROBES
+        elif domain == "tweeteval":
+            self.probes = TWEET_PROBES
         elif domain == "arxiv":
             self.probes = ARXIV_PROBES
         else:

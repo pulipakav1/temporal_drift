@@ -14,6 +14,8 @@ class InitialTrainer:
         domain = self.cfg["experiment"]["domain"]
         if domain == "financial":
             return int(self.cfg["model"]["num_labels_financial"])
+        if domain == "tweeteval":
+            return int(self.cfg["model"].get("num_labels_tweeteval", self.cfg["model"]["num_labels_financial"]))
         if domain == "arxiv":
             return int(self.cfg["model"]["num_labels_arxiv"])
         return int(self.cfg["model"]["num_labels_clinical"])

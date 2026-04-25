@@ -19,14 +19,64 @@ def load_financial_dataset(cache_dir: str, seed: int = 42) -> DatasetDict:
     cache = Path(cache_dir)
     if cache.exists():
         return load_from_disk(str(cache))
-    ds = load_dataset("takala/financial_phrasebank", "sentences_allagree", trust_remote_code=True)["train"]
-    ds = ds.rename_column("sentence", "text")
+    try:
+        ds = load_dataset("takala/financial_phrasebank", "sentences_allagree")["train"]
+        ds = ds.rename_column("sentence", "text")
+        source_name = "financial_phrasebank"
+    except Exception:
+        # Fallback for environments where legacy dataset scripts are blocked.
+        alt = load_dataset("zeroshot/twitter-financial-news-sentiment")
+        ds = concatenate_datasets([alt["train"], alt["validation"]])
+        source_name = "twitter_financial_news_sentiment"
     ds = ds.add_column("date", _pseudo_dates(len(ds)))
-    ds = ds.add_column("source", ["financial_phrasebank"] * len(ds))
+    ds = ds.add_column("source", [source_name] * len(ds))
     ds = ds.add_column("drift_event", ["none"] * len(ds))
     ds = ds.add_column("drift_provenance", ["none"] * len(ds))
     ds = ds.map(lambda x: inject_financial_drift(x, seed=seed))
     out = temporal_split(ds)
+    out.save_to_disk(str(cache))
+    return out
+
+
+def _annotate_tweet_drift(iso_date: str) -> tuple[str, str]:
+    x = datetime.fromisoformat(iso_date).date()
+    if date(2020, 3, 1) <= x <= date(2020, 6, 30):
+        return "covid_language_shift_2020", "pandemic_discourse_shift"
+    if date(2020, 10, 1) <= x <= date(2020, 12, 15):
+        return "us_election_sentiment_2020", "political_polarization_shift"
+    if date(2022, 2, 1) <= x <= date(2022, 4, 30):
+        return "ukraine_news_cycle_2022", "geopolitical_topic_shift"
+    if date(2022, 11, 1) <= x <= date(2023, 2, 28):
+        return "llm_discourse_shift_2022", "generative_ai_topic_shift"
+    return "none", "none"
+
+
+def load_tweeteval_dataset(cache_dir: str, seed: int = 42) -> DatasetDict:
+    del seed  # deterministic data loading
+    cache = Path(cache_dir)
+    if cache.exists():
+        return load_from_disk(str(cache))
+
+    ds = load_dataset("cardiffnlp/tweet_eval", "sentiment")
+    combined = concatenate_datasets([ds["train"], ds["validation"], ds["test"]])
+    pseudo_dates = _pseudo_dates(len(combined))
+    rows = []
+    for idx, row in enumerate(combined):
+        iso_date = pseudo_dates[idx]
+        drift_event, provenance = _annotate_tweet_drift(iso_date)
+        rows.append(
+            {
+                "text": str(row["text"]),
+                "label": int(row["label"]),
+                "date": iso_date,
+                "drift_event": drift_event,
+                "drift_provenance": provenance,
+                "source": "cardiffnlp/tweet_eval_sentiment",
+            }
+        )
+
+    frame = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+    out = temporal_split(Dataset.from_pandas(frame, preserve_index=False))
     out.save_to_disk(str(cache))
     return out
 

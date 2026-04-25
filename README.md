@@ -26,6 +26,12 @@ DriftLLM is a research and deployment-oriented framework for detecting drift in 
 pip install -r requirements.txt
 ```
 
+For Google Colab, use the lean dependency set:
+
+```bash
+pip install -r requirements-colab.txt
+```
+
 ## Reproducible Entry Points
 
 - Financial full pipeline:
@@ -75,6 +81,7 @@ bash scripts/run_clinical_accelerate.sh
 ## Dataset Notes
 
 - Financial primary dataset loads from `takala/financial_phrasebank` (`sentences_allagree`) with pseudo-temporal assignment and event-specific drift injections.
+- Public secondary dataset option is `cardiffnlp/tweet_eval` (`sentiment`) with pseudo-temporal assignment and event windows for major topic shifts.
 - Clinical secondary dataset expects local MIMIC-style CSV configured via `paths.mimic_path`.
 - MIMIC-III requires authorized access and proper credentialing; this repository does not ship restricted data.
 
@@ -96,9 +103,9 @@ python scripts/generate_run_matrix.py --output scripts/run_matrix_60.sh
 
 The default matrix is:
 
-- 2 domains: financial and clinical,
+- 2 domains: financial and tweeteval,
 - 3 seeds: 42, 52, 62,
-- 10 settings: selective EWC, no update, full LoRA, oracle, no EWC, top-k 4, top-k 16, replay 128, replay 0, and MMD threshold 0.02.
+- 11 settings: selective EWC, no update, full LoRA, oracle, no EWC, top-k 4, top-k 16, replay 128, replay 0, MMD threshold 0.02, and random routing ablation.
 
 Run the generated script from the repository root:
 
@@ -107,3 +114,26 @@ bash scripts/run_matrix_60.sh
 ```
 
 Clinical runs require a MIMIC-style CSV at `paths.mimic_path` with note/timestamp/code columns.
+
+## Colab Quickstart (TweetEval)
+
+In Colab:
+
+```bash
+from google.colab import drive
+drive.mount("/content/drive")
+```
+
+```bash
+%cd /content
+!git clone <YOUR_REPO_URL> temporal-drift
+%cd /content/temporal-drift
+!pip install -r requirements-colab.txt
+!bash scripts/run_colab_tweeteval.sh
+```
+
+Optional overrides:
+
+```bash
+!RESULTS_ROOT=/content/drive/MyDrive/temporal_drift_results MODEL_NAME=distilbert-base-uncased TAG=tweeteval_run1 bash scripts/run_colab_tweeteval.sh
+```

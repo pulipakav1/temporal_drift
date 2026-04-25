@@ -1,6 +1,7 @@
 model:
   name: "Qwen/Qwen2.5-7B-Instruct"
   num_labels_financial: 3
+  num_labels_tweeteval: 3
   num_labels_clinical: 50
   num_labels_arxiv: 11
   bf16: true
@@ -41,12 +42,22 @@ drift:
   min_samples: 200
   cooldown: 300
   check_every_steps: 50
+  domain_overrides:
+    financial:
+      mmd_threshold: 0.02
+      adwin_delta: 0.001
+      knowledge_threshold_pct: 0.15
+    tweeteval:
+      mmd_threshold: 0.015
+      adwin_delta: 0.0005
+      knowledge_threshold_pct: 0.12
 
 layer_selection:
   method: "fisher"
   top_k: 8
   fisher_samples: 128
   min_fisher_score: 0.0
+  routing_strategy: "drift_type"
 
 forgetting:
   ewc_lambda: 0.5
@@ -57,6 +68,7 @@ experiment:
   domain: "financial"
   seed: 42
   seeds: [42, 52, 62]
+  stream_split: "validation_test"
   run_name_prefix: "driftllm"
   wandb_project: "driftllm"
   wandb_entity: null
@@ -66,6 +78,7 @@ experiment:
 paths:
   data_root: "./artifacts/data"
   financial_cache: "./artifacts/data/financial_hf"
+  tweet_cache: "./artifacts/data/tweeteval_hf"
   arxiv_cache: "./artifacts/data/arxiv_hf"
   mimic_path: "./artifacts/data/mimic_iii.csv"
   model_dir: "./artifacts/models"

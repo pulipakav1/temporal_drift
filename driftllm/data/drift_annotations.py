@@ -31,10 +31,19 @@ ARXIV_EVENTS: List[DriftAnnotation] = [
     DriftAnnotation("systems_scaling_2024", date(2024, 2, 1), date(2024, 5, 31), "knowledge_drift", "arxiv"),
 ]
 
+TWEET_EVENTS: List[DriftAnnotation] = [
+    DriftAnnotation("covid_language_shift_2020", date(2020, 3, 1), date(2020, 6, 30), "semantic_drift", "tweeteval"),
+    DriftAnnotation("us_election_sentiment_2020", date(2020, 10, 1), date(2020, 12, 15), "label_drift", "tweeteval"),
+    DriftAnnotation("ukraine_news_cycle_2022", date(2022, 2, 1), date(2022, 4, 30), "semantic_drift", "tweeteval"),
+    DriftAnnotation("llm_discourse_shift_2022", date(2022, 11, 1), date(2023, 2, 28), "knowledge_drift", "tweeteval"),
+]
+
 
 def event_name_to_type(domain: str) -> Dict[str, str]:
     if domain == "financial":
         events = FINANCIAL_EVENTS
+    elif domain == "tweeteval":
+        events = TWEET_EVENTS
     elif domain == "arxiv":
         events = ARXIV_EVENTS
     else:

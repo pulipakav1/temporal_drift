@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 import torch
+import random
 
 
 class LayerSensitivityAnalyzer:
@@ -11,9 +12,11 @@ class LayerSensitivityAnalyzer:
         "knowledge_drift": ["gate_proj", "up_proj", "down_proj"],
     }
 
-    def __init__(self, top_k: int = 8, min_score: float = 0.0):
+    def __init__(self, top_k: int = 8, min_score: float = 0.0, routing_strategy: str = "drift_type", seed: int = 42):
         self.top_k = top_k
         self.min_score = min_score
+        self.routing_strategy = routing_strategy
+        self.rng = random.Random(seed)
 
     def compute_fisher(self, model, dataloader, n_samples: int = 128) -> Dict[str, float]:
         model.train()
@@ -37,12 +40,22 @@ class LayerSensitivityAnalyzer:
         fisher = {k: v for k, v in fisher.items() if "lora_" in k}
         if not fisher:
             return []
-        keys = self.DRIFT_TYPE_MODULES[drift_type]
-        filt = {k: v for k, v in fisher.items() if any(x in k for x in keys)}
-        ranked = sorted(filt.items(), key=lambda x: x[1], reverse=True)
-        selected = [k for k, v in ranked if v > self.min_score][: self.top_k]
-        if not selected:
-            fallback = sorted(fisher.items(), key=lambda x: x[1], reverse=True)
-            selected = [k for k, v in fallback if v > self.min_score][: self.top_k]
-        print(f"[LayerSensitivity] drift_type={drift_type} selected={[(k, fisher[k]) for k in selected]}")
+        fallback = sorted(fisher.items(), key=lambda x: x[1], reverse=True)
+        if self.routing_strategy == "random":
+            candidates = [k for k, v in fallback if v > self.min_score]
+            if not candidates:
+                return []
+            k = min(self.top_k, len(candidates))
+            selected = self.rng.sample(candidates, k=k)
+        else:
+            keys = self.DRIFT_TYPE_MODULES[drift_type]
+            filt = {k: v for k, v in fisher.items() if any(x in k for x in keys)}
+            ranked = sorted(filt.items(), key=lambda x: x[1], reverse=True)
+            selected = [k for k, v in ranked if v > self.min_score][: self.top_k]
+            if not selected:
+                selected = [k for k, v in fallback if v > self.min_score][: self.top_k]
+        print(
+            f"[LayerSensitivity] routing={self.routing_strategy} drift_type={drift_type} "
+            f"selected={[(k, fisher[k]) for k in selected]}"
+        )
         return selected

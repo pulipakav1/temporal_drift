@@ -17,11 +17,20 @@ class RandomProjection(torch.nn.Module):
 
 
 class SemanticDriftDetector(BaseDriftDetector):
-    def __init__(self, threshold: float, ref_size: int = 1000, window_size: int = 500):
+    def __init__(
+        self,
+        threshold: float,
+        ref_size: int = 1000,
+        window_size: int = 500,
+        check_every_steps: int = 50,
+        min_samples: int = 200,
+    ):
         self.threshold = threshold
         self.ref = deque(maxlen=ref_size)
         self.window = deque(maxlen=window_size)
         self.projector = None
+        self.check_every_steps = max(1, int(check_every_steps))
+        self.min_samples = max(20, int(min_samples))
 
     @staticmethod
     def _rbf(x, y, sigma):
@@ -48,12 +57,13 @@ class SemanticDriftDetector(BaseDriftDetector):
         if len(self.ref) < self.ref.maxlen:
             self.ref.append(z)
             return None
-        if step % 50 != 0 or len(self.window) < 200:
+        if step % self.check_every_steps != 0 or len(self.window) < self.min_samples:
             return None
         r = torch.stack(list(self.ref))
         w = torch.stack(list(self.window))
-        idx_r = torch.randperm(r.size(0))[:200]
-        idx_w = torch.randperm(w.size(0))[:200]
+        n_eval = min(self.min_samples, r.size(0), w.size(0))
+        idx_r = torch.randperm(r.size(0))[:n_eval]
+        idx_w = torch.randperm(w.size(0))[:n_eval]
         mmd = self._mmd_unbiased(r[idx_r], w[idx_w])
         if mmd > self.threshold:
             sev = min(1.0, mmd / (self.threshold * 5))

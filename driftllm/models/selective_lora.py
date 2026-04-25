@@ -13,7 +13,10 @@ class SelectiveLoRAModel:
         self.cfg = cfg
         self.forgetting_reg = forgetting_reg
         self.analyzer = LayerSensitivityAnalyzer(
-            top_k=cfg["layer_selection"]["top_k"], min_score=cfg["layer_selection"]["min_fisher_score"]
+            top_k=cfg["layer_selection"]["top_k"],
+            min_score=cfg["layer_selection"]["min_fisher_score"],
+            routing_strategy=cfg["layer_selection"].get("routing_strategy", "drift_type"),
+            seed=int(cfg["experiment"].get("seed", 42)),
         )
         self.model = None
         self.tokenizer = None

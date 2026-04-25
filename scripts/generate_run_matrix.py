@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 SEEDS = [42, 52, 62]
-DOMAINS = ["financial", "clinical"]
+DOMAINS = ["financial", "tweeteval"]
 
 EXPERIMENTS = [
     {"name": "selective_ewc", "method": "selective", "sets": []},
@@ -17,6 +17,7 @@ EXPERIMENTS = [
     {"name": "replay128", "method": "selective", "sets": ["forgetting.replay_buffer=128"]},
     {"name": "replay0", "method": "selective", "sets": ["forgetting.replay_buffer=0"]},
     {"name": "mmd002", "method": "selective", "sets": ["drift.mmd_threshold=0.02"]},
+    {"name": "random_route", "method": "selective", "sets": ["layer_selection.routing_strategy=random"]},
 ]
 
 
@@ -69,6 +70,8 @@ def build_command(args, domain, seed, exp):
         f"paths.data_root={data_root}",
         "--set",
         f"paths.financial_cache={data_root}/financial_hf",
+        "--set",
+        f"paths.tweet_cache={data_root}/tweeteval_hf",
         "--set",
         f"paths.mimic_path={data_root}/mimic_iii.csv",
         "--set",

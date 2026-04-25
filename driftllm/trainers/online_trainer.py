@@ -30,20 +30,34 @@ class OnlineDriftTrainer:
         self.cfg = cfg
         self.mode = mode
         self.forgetting = ForgettingRegularizer(cfg["forgetting"]["ewc_lambda"], cfg["forgetting"]["replay_buffer"])
-        if cfg["experiment"]["domain"] == "financial":
-            n_labels = 3
-        elif cfg["experiment"]["domain"] == "arxiv":
+        domain = cfg["experiment"]["domain"]
+        if domain == "financial":
+            n_labels = int(cfg["model"]["num_labels_financial"])
+        elif domain == "tweeteval":
+            n_labels = int(cfg["model"].get("num_labels_tweeteval", cfg["model"]["num_labels_financial"]))
+        elif domain == "arxiv":
             n_labels = int(cfg["model"]["num_labels_arxiv"])
         else:
             n_labels = int(cfg["model"]["num_labels_clinical"])
+        domain_defaults = cfg.get("drift", {}).get("domain_overrides", {}).get(domain, {})
+        mmd_threshold = float(domain_defaults.get("mmd_threshold", cfg["drift"]["mmd_threshold"]))
+        adwin_delta = float(domain_defaults.get("adwin_delta", cfg["drift"]["adwin_delta"]))
+        knowledge_threshold = float(domain_defaults.get("knowledge_threshold_pct", 0.20))
         self.model = SelectiveLoRAModel(cfg, self.forgetting).load(n_labels)
         self.orch = DriftOrchestrator(
-            SemanticDriftDetector(cfg["drift"]["mmd_threshold"], cfg["drift"]["reference_size"], cfg["drift"]["window_size"]),
-            LabelDriftDetector(n_labels, cfg["drift"]["adwin_delta"]),
-            KnowledgeDriftDetector(cfg["experiment"]["domain"]),
+            SemanticDriftDetector(
+                mmd_threshold,
+                cfg["drift"]["reference_size"],
+                cfg["drift"]["window_size"],
+                cfg["drift"].get("check_every_steps", 50),
+                cfg["drift"].get("min_samples", 200),
+            ),
+            LabelDriftDetector(n_labels, adwin_delta),
+            KnowledgeDriftDetector(domain, threshold_pct=knowledge_threshold),
             cfg["drift"]["cooldown"],
         )
         self.metrics = {"drift_events": []}
+        self.metrics["detector_fire_counts"] = {"semantic_drift": 0, "label_drift": 0, "knowledge_drift": 0, "oracle": 0}
         self.recent_true, self.recent_pred = deque(maxlen=100), deque(maxlen=100)
         self.buffer = deque(maxlen=cfg["forgetting"]["replay_buffer"])
         self.global_true = []
@@ -103,7 +117,8 @@ class OnlineDriftTrainer:
 
     def run(self, stream_loader=None):
         if stream_loader is None:
-            stream_loader = build_stream_loader(self.cfg, self.model.tokenizer, split="test", batch_size=1)
+            split = self.cfg["experiment"].get("stream_split", "test")
+            stream_loader = build_stream_loader(self.cfg, self.model.tokenizer, split=split, batch_size=1)
         for step, batch in enumerate(stream_loader, start=1):
             try:
                 device = next(self.model.model.parameters()).device
@@ -133,6 +148,10 @@ class OnlineDriftTrainer:
 
                     event = DriftEvent(step=step, drift_type="knowledge_drift", score=1.0, threshold=0.0, severity=1.0, detector="oracle")
                 if event:
+                    if event.detector == "oracle":
+                        self.metrics["detector_fire_counts"]["oracle"] += 1
+                    elif event.drift_type in self.metrics["detector_fire_counts"]:
+                        self.metrics["detector_fire_counts"][event.drift_type] += 1
                     self._handle_drift_event(event)
                     self._post_event_rolling_acc.append(float(np.mean(np.array(self.recent_true) == np.array(self.recent_pred))) if len(self.recent_true) > 0 else 0.0)
                 self._log_rolling_metrics(step)
@@ -194,6 +213,7 @@ class OnlineDriftTrainer:
             "drift_detection_fn": det_metrics["fn"],
             "mean_detection_delay_steps": det_metrics["mean_detection_delay_steps"],
             "drift_detection_per_type": per_type,
+            "detector_fire_counts": self.metrics["detector_fire_counts"],
             "forgetting_bound_violation_rate": bound_viol_rate,
             "forgetting_bound_violation_count": int(sum(1 for e in self.metrics["drift_events"] if e.get("bound_violated", False))),
             "recovery_speed_steps_to_90pct": int(recovery),

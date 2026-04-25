@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from driftllm.data.dataset import load_arxiv_dataset, load_financial_dataset, load_mimic_dataset
+from driftllm.data.dataset import load_arxiv_dataset, load_financial_dataset, load_mimic_dataset, load_tweeteval_dataset
 
 
 class TokenizedDataset(Dataset):
@@ -44,16 +44,24 @@ def _collate_fn(batch):
 
 
 def build_domain_splits(cfg) -> Dict[str, object]:
-    if cfg["experiment"]["domain"] == "financial":
+    domain = cfg["experiment"]["domain"]
+    if domain == "financial":
         return load_financial_dataset(cfg["paths"]["financial_cache"], seed=int(cfg["experiment"]["seed"]))
-    if cfg["experiment"]["domain"] == "arxiv":
+    if domain == "tweeteval":
+        return load_tweeteval_dataset(cfg["paths"]["tweet_cache"], seed=int(cfg["experiment"]["seed"]))
+    if domain == "arxiv":
         return load_arxiv_dataset(cfg["paths"]["arxiv_cache"], seed=int(cfg["experiment"]["seed"]))
     return load_mimic_dataset(cfg["paths"]["mimic_path"])
 
 
 def build_stream_loader(cfg, tokenizer, split: str = "test", batch_size: int = 1) -> DataLoader:
     splits = build_domain_splits(cfg)
-    rows = [dict(r) for r in splits[split]]
+    if split == "validation_test":
+        rows = [dict(r) for r in splits["validation"]] + [dict(r) for r in splits["test"]]
+    elif split == "full_stream":
+        rows = [dict(r) for r in splits["train"]] + [dict(r) for r in splits["validation"]] + [dict(r) for r in splits["test"]]
+    else:
+        rows = [dict(r) for r in splits[split]]
     ds = TokenizedDataset(rows, tokenizer=tokenizer, max_length=256)
     return DataLoader(ds, batch_size=batch_size, shuffle=False, collate_fn=_collate_fn)
 
