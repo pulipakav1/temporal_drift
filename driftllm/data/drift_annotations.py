@@ -26,9 +26,9 @@ CLINICAL_EVENTS: List[DriftAnnotation] = [
 ]
 
 ARXIV_EVENTS: List[DriftAnnotation] = [
-    DriftAnnotation("representation_shift_2013", date(2013, 1, 1), date(2013, 12, 31), "semantic_drift", "arxiv"),
-    DriftAnnotation("deep_learning_surge_2015", date(2015, 1, 1), date(2015, 12, 31), "label_drift", "arxiv"),
-    DriftAnnotation("systems_scaling_2016", date(2016, 1, 1), date(2016, 12, 31), "knowledge_drift", "arxiv"),
+    DriftAnnotation("representation_shift_2022", date(2022, 2, 1), date(2022, 5, 31), "semantic_drift", "arxiv"),
+    DriftAnnotation("deep_learning_surge_2023", date(2023, 3, 1), date(2023, 6, 30), "label_drift", "arxiv"),
+    DriftAnnotation("systems_scaling_2024", date(2024, 2, 1), date(2024, 5, 31), "knowledge_drift", "arxiv"),
 ]
 
 

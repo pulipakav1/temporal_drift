@@ -58,12 +58,12 @@ def _extract_arxiv_date(text: str) -> str | None:
 
 def _annotate_arxiv_drift(iso_date: str) -> tuple[str, str]:
     x = datetime.fromisoformat(iso_date).date()
-    if date(2013, 1, 1) <= x <= date(2013, 12, 31):
-        return "representation_shift_2013", "older_arxiv_topics"
-    if date(2015, 1, 1) <= x <= date(2015, 12, 31):
-        return "deep_learning_surge_2015", "neural_methods_growth"
-    if date(2016, 1, 1) <= x <= date(2016, 12, 31):
-        return "systems_scaling_2016", "large_scale_systems_and_optimization"
+    if date(2022, 2, 1) <= x <= date(2022, 5, 31):
+        return "representation_shift_2022", "older_arxiv_topics"
+    if date(2023, 3, 1) <= x <= date(2023, 6, 30):
+        return "deep_learning_surge_2023", "neural_methods_growth"
+    if date(2024, 2, 1) <= x <= date(2024, 5, 31):
+        return "systems_scaling_2024", "large_scale_systems_and_optimization"
     return "none", "none"
 
 
@@ -77,11 +77,29 @@ def load_arxiv_dataset(cache_dir: str, seed: int = 42) -> DatasetDict:
     combined = concatenate_datasets([ds["train"], ds["validation"], ds["test"]])
     label_names = combined.features["label"].names
 
-    rows = []
+    observed_dates = [_extract_arxiv_date(str(row["text"])) for row in combined]
     fallback_dates = _pseudo_dates(len(combined))
+    if all(d is not None for d in observed_dates):
+        parsed = [datetime.fromisoformat(d).date() for d in observed_dates if d is not None]
+        src_min, src_max = min(parsed), max(parsed)
+        src_span = max(1, (src_max - src_min).days)
+        dst_min, dst_max = date(2020, 1, 1), date(2024, 12, 31)
+        dst_span = (dst_max - dst_min).days
+
+        def _project_date(iso_date: str) -> str:
+            current = datetime.fromisoformat(iso_date).date()
+            rel = (current - src_min).days / src_span
+            return (dst_min + timedelta(days=int(rel * dst_span))).isoformat()
+
+    else:
+        def _project_date(iso_date: str) -> str:
+            return iso_date
+
+    rows = []
     for idx, row in enumerate(combined):
         text = str(row["text"])
-        iso_date = _extract_arxiv_date(text) or fallback_dates[idx]
+        raw_date = _extract_arxiv_date(text) or fallback_dates[idx]
+        iso_date = _project_date(raw_date)
         drift_event, provenance = _annotate_arxiv_drift(iso_date)
         rows.append(
             {
