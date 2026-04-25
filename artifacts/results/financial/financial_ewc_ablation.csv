@@ -1,0 +1,3 @@
+method,accuracy,macro_f1,weighted_f1
+selective_ewc,0.681031,0.479978,0.720867
+selective_no_ewc,0.680663,0.479549,0.720318

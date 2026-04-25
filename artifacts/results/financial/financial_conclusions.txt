@@ -1,0 +1,8 @@
+Financial experiment summary
+
+1. Oracle is the expected upper bound and performs best overall.
+2. Replay128 is the strongest practical setting on the financial benchmark.
+3. Default selective adaptation, MMD=0.02, and no-EWC are nearly tied, suggesting the main gain comes from selective routing itself.
+4. Top-k=4 approximately matches full LoRA mean accuracy while using far fewer updates/parameters.
+5. Replay=0 collapses to the no-update regime, confirming replay is important.
+6. Forgetting metrics remained near zero across these financial runs, so EWC had minimal measurable effect in this setup.

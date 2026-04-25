@@ -1,0 +1,4 @@
+method,accuracy,macro_f1,weighted_f1,n_param_updates,avg_layers_per_event,avg_params_per_event,avg_pct_lora_params_per_event
+no_update,0.5425,0.3215,0.5802,0,0,0,0.0
+selective,0.681031,0.479978,0.720867,8,4,229376,0.005682
+full_lora,0.67035,0.461208,0.702264,28,14,802816,0.019886
