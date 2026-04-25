@@ -3,7 +3,14 @@ from typing import Dict, List, Optional
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from driftllm.data.dataset import load_arxiv_dataset, load_financial_dataset, load_mimic_dataset, load_tweeteval_dataset
+from driftllm.data.dataset import (
+    load_agnews_dataset,
+    load_amazon_dataset,
+    load_arxiv_dataset,
+    load_financial_dataset,
+    load_mimic_dataset,
+    load_tweeteval_dataset,
+)
 
 
 class TokenizedDataset(Dataset):
@@ -49,6 +56,10 @@ def build_domain_splits(cfg) -> Dict[str, object]:
         return load_financial_dataset(cfg["paths"]["financial_cache"], seed=int(cfg["experiment"]["seed"]))
     if domain == "tweeteval":
         return load_tweeteval_dataset(cfg["paths"]["tweet_cache"], seed=int(cfg["experiment"]["seed"]))
+    if domain == "agnews":
+        return load_agnews_dataset(cfg["paths"].get("agnews_cache", "./artifacts/data/agnews_hf"), seed=int(cfg["experiment"]["seed"]))
+    if domain == "amazon":
+        return load_amazon_dataset(cfg["paths"].get("amazon_cache", "./artifacts/data/amazon_hf"), seed=int(cfg["experiment"]["seed"]))
     if domain == "arxiv":
         return load_arxiv_dataset(cfg["paths"]["arxiv_cache"], seed=int(cfg["experiment"]["seed"]))
     return load_mimic_dataset(cfg["paths"]["mimic_path"])
@@ -62,7 +73,8 @@ def build_stream_loader(cfg, tokenizer, split: str = "test", batch_size: int = 1
         rows = [dict(r) for r in splits["train"]] + [dict(r) for r in splits["validation"]] + [dict(r) for r in splits["test"]]
     else:
         rows = [dict(r) for r in splits[split]]
-    ds = TokenizedDataset(rows, tokenizer=tokenizer, max_length=256)
+    max_length = 256 if cfg["experiment"]["domain"] == "amazon" else 256
+    ds = TokenizedDataset(rows, tokenizer=tokenizer, max_length=max_length)
     return DataLoader(ds, batch_size=batch_size, shuffle=False, collate_fn=_collate_fn)
 
 

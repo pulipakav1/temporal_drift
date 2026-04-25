@@ -12,10 +12,12 @@ class InitialTrainer:
 
     def _num_labels(self) -> int:
         domain = self.cfg["experiment"]["domain"]
-        if domain == "financial":
+        if domain in ("financial", "twitter", "tweeteval"):
             return int(self.cfg["model"]["num_labels_financial"])
-        if domain == "tweeteval":
-            return int(self.cfg["model"].get("num_labels_tweeteval", self.cfg["model"]["num_labels_financial"]))
+        if domain == "agnews":
+            return int(self.cfg["model"]["num_labels_agnews"])
+        if domain == "amazon":
+            return int(self.cfg["model"].get("num_labels_amazon", self.cfg["model"]["num_labels_financial"]))
         if domain == "arxiv":
             return int(self.cfg["model"]["num_labels_arxiv"])
         return int(self.cfg["model"]["num_labels_clinical"])

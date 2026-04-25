@@ -44,17 +44,38 @@ TWEET_PROBES: List[str] = [
     "Platform-specific slang evolves quickly over time.",
 ]
 
+AGNEWS_PROBES: List[str] = [
+    "Global news coverage intensity can change rapidly during pandemics.",
+    "U.S. presidential elections usually drive spikes in world and politics headlines.",
+    "Geopolitical conflicts can quickly dominate international news agendas.",
+    "Technology coverage increased significantly after major AI product releases in late 2022.",
+    "Business news shares can drop when world events dominate front-page attention.",
+    "Science and technology sections often absorb AI-related breakthroughs.",
+    "Topic distributions in news datasets can shift substantially after global shocks.",
+]
+
+AMAZON_PROBES: List[str] = [
+    "E-commerce review sentiment can shift during large supply chain disruptions.",
+    "Delivery delays often increase negative product reviews.",
+    "Consumer product demand changed sharply during COVID lockdown periods.",
+    "Post-pandemic shopping patterns affected review language and product focus.",
+    "Books and media categories can reflect broader social trend shifts.",
+    "New technology product cycles introduce novel terminology in reviews.",
+    "Amazon review topic and sentiment distributions vary over calendar years.",
+]
+
 
 class KnowledgeDriftDetector(BaseDriftDetector):
     def __init__(self, domain: str, threshold_pct: float = 0.20):
-        if domain == "financial":
-            self.probes = FIN_PROBES
-        elif domain == "tweeteval":
-            self.probes = TWEET_PROBES
-        elif domain == "arxiv":
-            self.probes = ARXIV_PROBES
-        else:
-            self.probes = CLINICAL_PROBES
+        probe_map = {
+            "financial": FIN_PROBES,
+            "tweeteval": TWEET_PROBES,
+            "agnews": AGNEWS_PROBES,
+            "amazon": AMAZON_PROBES,
+            "arxiv": ARXIV_PROBES,
+            "clinical": CLINICAL_PROBES,
+        }
+        self.probes = probe_map.get(domain, CLINICAL_PROBES)
         self.threshold_pct = threshold_pct
         self.hist = deque(maxlen=20)
 

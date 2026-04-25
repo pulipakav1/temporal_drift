@@ -1,0 +1,10 @@
+experiment:
+  domain: "amazon"
+
+drift:
+  mmd_threshold: 0.04
+  adwin_delta: 0.002
+  window_size: 400
+  reference_size: 800
+  cooldown: 300
+  check_every_steps: 50

@@ -1,4 +1,6 @@
 import re
+import hashlib
+import random
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -77,6 +79,169 @@ def load_tweeteval_dataset(cache_dir: str, seed: int = 42) -> DatasetDict:
 
     frame = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
     out = temporal_split(Dataset.from_pandas(frame, preserve_index=False))
+    out.save_to_disk(str(cache))
+    return out
+
+
+def _annotate_agnews_drift(iso_date: str) -> tuple[str, str]:
+    x = datetime.fromisoformat(iso_date).date()
+    if date(2020, 3, 1) <= x <= date(2020, 5, 31):
+        return "covid_world_surge_2020", "covid_world_label_boost_40pct"
+    if date(2020, 10, 15) <= x <= date(2020, 11, 30):
+        return "us_election_world_2020", "election_world_label_boost_30pct"
+    if date(2022, 2, 24) <= x <= date(2022, 4, 30):
+        return "ukraine_world_surge_2022", "ukraine_world_label_boost_35pct"
+    if date(2022, 11, 1) <= x <= date(2023, 3, 31):
+        return "ai_scitech_boom_2022", "ai_scitech_label_boost_30pct"
+    return "none", "none"
+
+
+def _inject_agnews_drift(example, seed: int = 42):
+    stable_offset = int(hashlib.md5(str(example["date"]).encode("utf-8")).hexdigest()[:8], 16)
+    rng = random.Random(seed + stable_offset)
+    d = datetime.fromisoformat(example["date"]).date()
+    label = int(example["label"])
+    event = "none"
+    provenance = "none"
+    if date(2020, 3, 1) <= d <= date(2020, 5, 31):
+        event = "covid_world_surge_2020"
+        if label in {1, 2} and rng.random() < 0.40:
+            label = 0
+            provenance = "covid_world_label_boost_40pct"
+    if date(2020, 10, 15) <= d <= date(2020, 11, 30):
+        event = "us_election_world_2020"
+        if label in {1, 2, 3} and rng.random() < 0.30:
+            label = 0
+            provenance = "election_world_label_boost_30pct"
+    if date(2022, 2, 24) <= d <= date(2022, 4, 30):
+        event = "ukraine_world_surge_2022"
+        if label in {1, 2, 3} and rng.random() < 0.35:
+            label = 0
+            provenance = "ukraine_world_label_boost_35pct"
+    if date(2022, 11, 1) <= d <= date(2023, 3, 31):
+        event = "ai_scitech_boom_2022"
+        if label == 2 and rng.random() < 0.30:
+            label = 3
+            provenance = "ai_scitech_label_boost_30pct"
+    return {"label": label, "drift_event": event, "drift_provenance": provenance}
+
+
+def load_agnews_dataset(cache_dir: str, seed: int = 42) -> DatasetDict:
+    cache = Path(cache_dir)
+    if cache.exists():
+        return load_from_disk(str(cache))
+    ds = load_dataset("ag_news")
+    combined = concatenate_datasets([ds["train"], ds["test"]])
+    combined = combined.add_column("date", _pseudo_dates(len(combined)))
+    combined = combined.add_column("source", ["ag_news"] * len(combined))
+    combined = combined.map(lambda x: _inject_agnews_drift(x, seed=seed))
+    out = temporal_split(combined)
+    out.save_to_disk(str(cache))
+    return out
+
+
+def _timestamp_ms_to_iso(ms_value) -> str | None:
+    try:
+        value = int(ms_value)
+    except (TypeError, ValueError):
+        return None
+    if value <= 0:
+        return None
+    return datetime.utcfromtimestamp(value / 1000.0).date().isoformat()
+
+
+def _rating_to_sentiment_label(rating: int) -> int:
+    if rating <= 2:
+        return 0
+    if rating == 3:
+        return 1
+    return 2
+
+
+def _annotate_amazon_drift(iso_date: str) -> tuple[str, str]:
+    x = datetime.fromisoformat(iso_date).date()
+    if date(2020, 3, 1) <= x <= date(2020, 5, 31):
+        return (
+            "covid_shopping_shift_2020",
+            "COVID lockdown shifts Amazon purchasing patterns and review language",
+        )
+    if date(2021, 8, 1) <= x <= date(2021, 12, 31):
+        return (
+            "supply_chain_crisis_2021",
+            "Supply chain disruptions — negative reviews surge for delayed items",
+        )
+    if date(2022, 3, 1) <= x <= date(2022, 6, 30):
+        return (
+            "post_covid_return_2022",
+            "Return to normal purchasing — review language and topics shift",
+        )
+    if date(2023, 1, 1) <= x <= date(2023, 6, 30):
+        return (
+            "ai_review_shift_2023",
+            "AI/tech product surge — new product category terminology",
+        )
+    return "none", "none"
+
+
+def _inject_amazon_drift(example, seed: int = 42):
+    stable_offset = int(hashlib.md5(str(example["date"]).encode("utf-8")).hexdigest()[:8], 16)
+    rng = random.Random(seed + stable_offset)
+    label = int(example["label"])
+    event, provenance = _annotate_amazon_drift(example["date"])
+    if event == "supply_chain_crisis_2021" and label == 1 and rng.random() < 0.25:
+        label = 0
+        provenance = "supply_chain_neutral_to_negative_25pct"
+    return {"label": label, "drift_event": event, "drift_provenance": provenance}
+
+
+def load_amazon_dataset(cache_dir: str, seed: int = 42, max_records: int = 50000) -> DatasetDict:
+    cache = Path(cache_dir)
+    if cache.exists():
+        return load_from_disk(str(cache))
+
+    ds = load_dataset("McAuley-Lab/Amazon-Reviews-2023", "raw_review_Books", trust_remote_code=True)["full"]
+    rows = []
+    for row in ds:
+        iso_date = _timestamp_ms_to_iso(row.get("timestamp"))
+        if iso_date is None:
+            continue
+        d = datetime.fromisoformat(iso_date).date()
+        if not (date(2020, 1, 1) <= d <= date(2024, 12, 31)):
+            continue
+        rows.append(
+            {
+                "text": str(row.get("text", "")),
+                "label": _rating_to_sentiment_label(int(row.get("rating", 3))),
+                "date": iso_date,
+                "source": "amazon_reviews_2023_books",
+            }
+        )
+
+    frame = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+    frame["year"] = pd.to_datetime(frame["date"]).dt.year
+    if len(frame) > max_records:
+        counts = frame["year"].value_counts().sort_index()
+        total = int(counts.sum())
+        targets = {int(y): int(max_records * int(c) / total) for y, c in counts.items()}
+        remaining = int(max_records - sum(targets.values()))
+        remainders = sorted(
+            ((int(y), (max_records * int(c) / total) - targets[int(y)]) for y, c in counts.items()),
+            key=lambda x: x[1],
+            reverse=True,
+        )
+        for y, _ in remainders[:remaining]:
+            targets[y] += 1
+        sampled = []
+        for y, target in targets.items():
+            part = frame[frame["year"] == y]
+            sampled.append(part.sample(n=min(target, len(part)), random_state=seed))
+        frame = pd.concat(sampled, axis=0).sort_values("date").reset_index(drop=True)
+    frame = frame.drop(columns=["year"])
+    enriched = Dataset.from_pandas(frame, preserve_index=False).map(lambda x: _inject_amazon_drift(x, seed=seed))
+    out = temporal_split(enriched)
+    print(
+        f"[amazon] split sizes train={len(out['train'])} validation={len(out['validation'])} test={len(out['test'])}"
+    )
     out.save_to_disk(str(cache))
     return out
 

@@ -1,0 +1,10 @@
+experiment:
+  domain: "agnews"
+
+drift:
+  mmd_threshold: 0.03
+  adwin_delta: 0.001
+  window_size: 300
+  reference_size: 600
+  cooldown: 250
+  check_every_steps: 40

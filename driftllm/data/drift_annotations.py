@@ -38,12 +38,30 @@ TWEET_EVENTS: List[DriftAnnotation] = [
     DriftAnnotation("llm_discourse_shift_2022", date(2022, 11, 1), date(2023, 2, 28), "knowledge_drift", "tweeteval"),
 ]
 
+AGNEWS_EVENTS: List[DriftAnnotation] = [
+    DriftAnnotation("covid_world_surge_2020", date(2020, 3, 1), date(2020, 5, 31), "label_drift", "agnews"),
+    DriftAnnotation("us_election_world_2020", date(2020, 10, 15), date(2020, 11, 30), "label_drift", "agnews"),
+    DriftAnnotation("ukraine_world_surge_2022", date(2022, 2, 24), date(2022, 4, 30), "label_drift", "agnews"),
+    DriftAnnotation("ai_scitech_boom_2022", date(2022, 11, 1), date(2023, 3, 31), "semantic_drift", "agnews"),
+]
+
+AMAZON_EVENTS: List[DriftAnnotation] = [
+    DriftAnnotation("covid_shopping_shift_2020", date(2020, 3, 1), date(2020, 5, 31), "semantic_drift", "amazon"),
+    DriftAnnotation("supply_chain_crisis_2021", date(2021, 8, 1), date(2021, 12, 31), "label_drift", "amazon"),
+    DriftAnnotation("post_covid_return_2022", date(2022, 3, 1), date(2022, 6, 30), "semantic_drift", "amazon"),
+    DriftAnnotation("ai_review_shift_2023", date(2023, 1, 1), date(2023, 6, 30), "knowledge_drift", "amazon"),
+]
+
 
 def event_name_to_type(domain: str) -> Dict[str, str]:
     if domain == "financial":
         events = FINANCIAL_EVENTS
     elif domain == "tweeteval":
         events = TWEET_EVENTS
+    elif domain == "agnews":
+        events = AGNEWS_EVENTS
+    elif domain == "amazon":
+        events = AMAZON_EVENTS
     elif domain == "arxiv":
         events = ARXIV_EVENTS
     else:

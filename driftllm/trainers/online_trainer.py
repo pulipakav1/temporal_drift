@@ -31,10 +31,12 @@ class OnlineDriftTrainer:
         self.mode = mode
         self.forgetting = ForgettingRegularizer(cfg["forgetting"]["ewc_lambda"], cfg["forgetting"]["replay_buffer"])
         domain = cfg["experiment"]["domain"]
-        if domain == "financial":
+        if domain in ("financial", "twitter", "tweeteval"):
             n_labels = int(cfg["model"]["num_labels_financial"])
-        elif domain == "tweeteval":
-            n_labels = int(cfg["model"].get("num_labels_tweeteval", cfg["model"]["num_labels_financial"]))
+        elif domain == "agnews":
+            n_labels = int(cfg["model"]["num_labels_agnews"])
+        elif domain == "amazon":
+            n_labels = int(cfg["model"].get("num_labels_amazon", cfg["model"]["num_labels_financial"]))
         elif domain == "arxiv":
             n_labels = int(cfg["model"]["num_labels_arxiv"])
         else:
