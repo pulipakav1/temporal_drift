@@ -24,11 +24,25 @@ CLINICAL_PROBES: List[str] = [
     "Clinical notes often contain temporal symptom trajectories.",
     "MIMIC-III includes ICU patient records and outcomes.",
 ]
+ARXIV_PROBES: List[str] = [
+    "arXiv papers are organized into subject areas such as cs, math, and stat.",
+    "An abstract usually summarizes the problem, method, and results of a paper.",
+    "Optimization, representation learning, and systems papers often use different vocabularies.",
+    "Machine learning papers on arXiv increased sharply during the mid-2010s.",
+    "The primary category of an arXiv paper is often predictive of its language and citations.",
+    "Scientific abstracts often contain task-specific terminology and named benchmarks.",
+    "Research trends on arXiv shift over time as new methods become popular.",
+]
 
 
 class KnowledgeDriftDetector(BaseDriftDetector):
     def __init__(self, domain: str, threshold_pct: float = 0.20):
-        self.probes = FIN_PROBES if domain == "financial" else CLINICAL_PROBES
+        if domain == "financial":
+            self.probes = FIN_PROBES
+        elif domain == "arxiv":
+            self.probes = ARXIV_PROBES
+        else:
+            self.probes = CLINICAL_PROBES
         self.threshold_pct = threshold_pct
         self.hist = deque(maxlen=20)
 

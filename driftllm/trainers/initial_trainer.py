@@ -10,9 +10,17 @@ class InitialTrainer:
     def __init__(self, cfg):
         self.cfg = cfg
 
+    def _num_labels(self) -> int:
+        domain = self.cfg["experiment"]["domain"]
+        if domain == "financial":
+            return int(self.cfg["model"]["num_labels_financial"])
+        if domain == "arxiv":
+            return int(self.cfg["model"]["num_labels_arxiv"])
+        return int(self.cfg["model"]["num_labels_clinical"])
+
     def run(self):
         splits = build_domain_splits(self.cfg)
-        n_labels = self.cfg["model"]["num_labels_financial"] if self.cfg["experiment"]["domain"] == "financial" else self.cfg["model"]["num_labels_clinical"]
+        n_labels = self._num_labels()
         model, tok = load_model_tokenizer(
             self.cfg["model"]["name"], n_labels, self.cfg["model"]["bf16"], self.cfg["model"]["device_map"]
         )

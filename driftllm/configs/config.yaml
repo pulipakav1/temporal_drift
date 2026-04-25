@@ -2,6 +2,7 @@ model:
   name: "Qwen/Qwen2.5-7B-Instruct"
   num_labels_financial: 3
   num_labels_clinical: 50
+  num_labels_arxiv: 11
   bf16: true
   device_map: "auto"
 
@@ -65,6 +66,7 @@ experiment:
 paths:
   data_root: "./artifacts/data"
   financial_cache: "./artifacts/data/financial_hf"
+  arxiv_cache: "./artifacts/data/arxiv_hf"
   mimic_path: "./artifacts/data/mimic_iii.csv"
   model_dir: "./artifacts/models"
   results_dir: "./artifacts/results"

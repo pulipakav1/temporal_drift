@@ -25,7 +25,18 @@ CLINICAL_EVENTS: List[DriftAnnotation] = [
     DriftAnnotation("covid_treatment_shift_2021", date(2021, 8, 1), date(2021, 10, 31), "knowledge_drift", "clinical"),
 ]
 
+ARXIV_EVENTS: List[DriftAnnotation] = [
+    DriftAnnotation("representation_shift_2013", date(2013, 1, 1), date(2013, 12, 31), "semantic_drift", "arxiv"),
+    DriftAnnotation("deep_learning_surge_2015", date(2015, 1, 1), date(2015, 12, 31), "label_drift", "arxiv"),
+    DriftAnnotation("systems_scaling_2016", date(2016, 1, 1), date(2016, 12, 31), "knowledge_drift", "arxiv"),
+]
+
 
 def event_name_to_type(domain: str) -> Dict[str, str]:
-    events = FINANCIAL_EVENTS if domain == "financial" else CLINICAL_EVENTS
+    if domain == "financial":
+        events = FINANCIAL_EVENTS
+    elif domain == "arxiv":
+        events = ARXIV_EVENTS
+    else:
+        events = CLINICAL_EVENTS
     return {e.name: e.drift_type for e in events}

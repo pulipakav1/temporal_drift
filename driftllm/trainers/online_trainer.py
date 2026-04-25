@@ -30,12 +30,16 @@ class OnlineDriftTrainer:
         self.cfg = cfg
         self.mode = mode
         self.forgetting = ForgettingRegularizer(cfg["forgetting"]["ewc_lambda"], cfg["forgetting"]["replay_buffer"])
-        self.model = SelectiveLoRAModel(cfg, self.forgetting).load(
-            3 if cfg["experiment"]["domain"] == "financial" else cfg["model"]["num_labels_clinical"]
-        )
+        if cfg["experiment"]["domain"] == "financial":
+            n_labels = 3
+        elif cfg["experiment"]["domain"] == "arxiv":
+            n_labels = int(cfg["model"]["num_labels_arxiv"])
+        else:
+            n_labels = int(cfg["model"]["num_labels_clinical"])
+        self.model = SelectiveLoRAModel(cfg, self.forgetting).load(n_labels)
         self.orch = DriftOrchestrator(
             SemanticDriftDetector(cfg["drift"]["mmd_threshold"], cfg["drift"]["reference_size"], cfg["drift"]["window_size"]),
-            LabelDriftDetector(3 if cfg["experiment"]["domain"] == "financial" else cfg["model"]["num_labels_clinical"], cfg["drift"]["adwin_delta"]),
+            LabelDriftDetector(n_labels, cfg["drift"]["adwin_delta"]),
             KnowledgeDriftDetector(cfg["experiment"]["domain"]),
             cfg["drift"]["cooldown"],
         )

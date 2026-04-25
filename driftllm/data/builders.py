@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from driftllm.data.dataset import load_financial_dataset, load_mimic_dataset
+from driftllm.data.dataset import load_arxiv_dataset, load_financial_dataset, load_mimic_dataset
 
 
 class TokenizedDataset(Dataset):
@@ -46,6 +46,8 @@ def _collate_fn(batch):
 def build_domain_splits(cfg) -> Dict[str, object]:
     if cfg["experiment"]["domain"] == "financial":
         return load_financial_dataset(cfg["paths"]["financial_cache"], seed=int(cfg["experiment"]["seed"]))
+    if cfg["experiment"]["domain"] == "arxiv":
+        return load_arxiv_dataset(cfg["paths"]["arxiv_cache"], seed=int(cfg["experiment"]["seed"]))
     return load_mimic_dataset(cfg["paths"]["mimic_path"])
 
 
