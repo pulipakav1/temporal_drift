@@ -1,0 +1,5 @@
+Domain,Category,Setting,Accuracy,Macro F1,Weighted F1,Notes
+Financial,Best Practical,Selective + Replay128,0.772376,0.571497,0.824541,Strongest practical setting; replay mattered most.
+Financial,Best Sparse,Selective,0.681031,0.479978,0.720867,Efficient selective adaptation; top-k=4 roughly matched full LoRA.
+ArXiv,Best Practical,Oracle,0.54913,0.352167,0.543107,Oracle-triggered adaptation outperformed no-update.
+ArXiv,Best Available Baseline,No Update,0.530324,0.315023,0.516386,Most non-oracle settings collapsed to the no-update regime.

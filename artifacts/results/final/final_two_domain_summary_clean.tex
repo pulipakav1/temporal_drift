@@ -1,0 +1,10 @@
+\begin{tabular}{lllrrrl}
+\toprule
+Domain & Category & Setting & Accuracy & Macro F1 & Weighted F1 & Notes \\
+\midrule
+Financial & Best Practical & Selective + Replay128 & 0.7724 & 0.5715 & 0.8245 & Strongest practical setting; replay mattered most. \\
+Financial & Best Sparse & Selective & 0.6810 & 0.4800 & 0.7209 & Efficient selective adaptation; top-k=4 roughly matched full LoRA. \\
+ArXiv & Best Practical & Oracle & 0.5491 & 0.3522 & 0.5431 & Oracle-triggered adaptation outperformed no-update. \\
+ArXiv & Best Available Baseline & No Update & 0.5303 & 0.3150 & 0.5164 & Most non-oracle settings collapsed to the no-update regime. \\
+\bottomrule
+\end{tabular}

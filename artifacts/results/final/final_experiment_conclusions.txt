@@ -1,0 +1,9 @@
+Final experiment summary
+
+1. Financial experiments are fully complete and form the main empirical result.
+2. Replay128 was the strongest practical financial setting.
+3. Default selective adaptation remained a strong sparse baseline.
+4. On financial, top-k=4 approximately matched full LoRA mean accuracy with fewer updates.
+5. ArXiv provided a real second-domain benchmark.
+6. On arXiv, oracle-triggered adaptation improved over no-update, but detector-driven adaptation did not reliably activate.
+7. Therefore, the paper's strongest claim is robust financial drift adaptation, with supporting cross-domain evidence on arXiv under oracle drift windows.

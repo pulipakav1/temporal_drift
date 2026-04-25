@@ -1,0 +1,9 @@
+ArXiv summary
+
+1. The arXiv domain loader, temporal split, and adaptation pipeline executed successfully on a real public second-domain dataset.
+2. Detector-driven adaptation did not reliably trigger on arXiv under the current detector calibration, so most non-oracle settings collapsed to the no-update regime.
+3. Oracle-triggered adaptation improved over no-update:
+   - Accuracy: 0.5491 vs 0.5303
+   - Macro F1: 0.3522 vs 0.3150
+   - Weighted F1: 0.5431 vs 0.5164
+4. These results show cross-domain adaptability under annotated drift windows, while detector calibration for arXiv remains future work.
