@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import torch
+from tqdm.auto import tqdm
 
 from driftllm.data.builders import build_domain_splits
 from driftllm.models.base_model import load_model_tokenizer
@@ -44,7 +45,8 @@ class InitialTrainer:
         out_dir.mkdir(parents=True, exist_ok=True)
         for epoch in range(int(self.cfg["training"].get("initial_epochs", 3))):
             model.train()
-            for row in train_rows:
+            train_iter = tqdm(train_rows, desc=f"initial-train epoch {epoch + 1}", leave=False)
+            for step, row in enumerate(train_iter, start=1):
                 enc = tok(
                     str(row["text"]), truncation=True, max_length=256, padding="max_length", return_tensors="pt"
                 )
@@ -55,10 +57,13 @@ class InitialTrainer:
                 torch.nn.utils.clip_grad_norm_(trainable_params, float(self.cfg["training"]["gradient_clip"]))
                 opt.step()
                 opt.zero_grad(set_to_none=True)
+                if step % 100 == 0:
+                    train_iter.set_postfix(loss=f"{loss.item():.4f}")
             model.eval()
             y_true, y_pred = [], []
             with torch.no_grad():
-                for row in val_rows:
+                val_iter = tqdm(val_rows, desc=f"initial-val epoch {epoch + 1}", leave=False)
+                for row in val_iter:
                     enc = tok(
                         str(row["text"]), truncation=True, max_length=256, padding="max_length", return_tensors="pt"
                     )
