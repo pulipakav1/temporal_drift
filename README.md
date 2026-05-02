@@ -36,8 +36,6 @@ pip install -r requirements-colab.txt
 
 - Financial full pipeline:
   - `bash scripts/run_financial.sh`
-- Clinical full pipeline:
-  - `bash scripts/run_clinical.sh`
 - Baseline suite:
   - `bash scripts/run_baselines.sh`
 - Ablations:
@@ -55,7 +53,6 @@ Convenience scripts are also provided:
 
 ```bash
 bash scripts/run_financial_accelerate.sh
-bash scripts/run_clinical_accelerate.sh
 ```
 
 ## Core Metrics Reported
@@ -82,9 +79,6 @@ bash scripts/run_clinical_accelerate.sh
 
 - Financial primary dataset loads from `takala/financial_phrasebank` (`sentences_allagree`) with pseudo-temporal assignment and event-specific drift injections.
 - Public secondary dataset option is `cardiffnlp/tweet_eval` (`sentiment`) with pseudo-temporal assignment and event windows for major topic shifts.
-- Clinical secondary dataset expects local MIMIC-style CSV configured via `paths.mimic_path`.
-- MIMIC-III requires authorized access and proper credentialing; this repository does not ship restricted data.
-
 ## Paper Figure Generation
 
 ```bash
@@ -112,8 +106,6 @@ Run the generated script from the repository root:
 ```bash
 bash scripts/run_matrix_60.sh
 ```
-
-Clinical runs require a MIMIC-style CSV at `paths.mimic_path` with note/timestamp/code columns.
 
 ## Colab Quickstart (TweetEval)
 

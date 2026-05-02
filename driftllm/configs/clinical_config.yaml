@@ -1,6 +1,0 @@
-experiment:
-  domain: "clinical"
-
-dataset:
-  source: "mimic_iii"
-  top_k_codes: 50

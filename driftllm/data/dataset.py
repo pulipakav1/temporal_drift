@@ -199,9 +199,17 @@ def load_amazon_dataset(cache_dir: str, seed: int = 42, max_records: int = 50000
     if cache.exists():
         return load_from_disk(str(cache))
 
-    ds = load_dataset("McAuley-Lab/Amazon-Reviews-2023", "raw_review_Books", trust_remote_code=True)["full"]
+    # streaming=True avoids downloading the entire multi-GB dataset to disk before iterating.
+    ds = load_dataset(
+        "McAuley-Lab/Amazon-Reviews-2023",
+        "raw_review_Books",
+        trust_remote_code=True,
+        streaming=True,
+    )["full"]
     rows = []
     for row in ds:
+        if len(rows) >= max_records:
+            break
         iso_date = _timestamp_ms_to_iso(row.get("timestamp"))
         if iso_date is None:
             continue
@@ -218,25 +226,6 @@ def load_amazon_dataset(cache_dir: str, seed: int = 42, max_records: int = 50000
         )
 
     frame = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
-    frame["year"] = pd.to_datetime(frame["date"]).dt.year
-    if len(frame) > max_records:
-        counts = frame["year"].value_counts().sort_index()
-        total = int(counts.sum())
-        targets = {int(y): int(max_records * int(c) / total) for y, c in counts.items()}
-        remaining = int(max_records - sum(targets.values()))
-        remainders = sorted(
-            ((int(y), (max_records * int(c) / total) - targets[int(y)]) for y, c in counts.items()),
-            key=lambda x: x[1],
-            reverse=True,
-        )
-        for y, _ in remainders[:remaining]:
-            targets[y] += 1
-        sampled = []
-        for y, target in targets.items():
-            part = frame[frame["year"] == y]
-            sampled.append(part.sample(n=min(target, len(part)), random_state=seed))
-        frame = pd.concat(sampled, axis=0).sort_values("date").reset_index(drop=True)
-    frame = frame.drop(columns=["year"])
     enriched = Dataset.from_pandas(frame, preserve_index=False).map(lambda x: _inject_amazon_drift(x, seed=seed))
     out = temporal_split(enriched)
     print(
@@ -244,18 +233,6 @@ def load_amazon_dataset(cache_dir: str, seed: int = 42, max_records: int = 50000
     )
     out.save_to_disk(str(cache))
     return out
-
-
-def load_mimic_dataset(path: str) -> DatasetDict:
-    df = pd.read_csv(path)
-    df = df.rename(columns={"note": "text", "timestamp": "date", "code": "label"})
-    if "drift_event" not in df.columns:
-        df["drift_event"] = "none"
-    if "drift_provenance" not in df.columns:
-        df["drift_provenance"] = "clinical_source_or_annotation"
-    df["source"] = "mimic_iii"
-    ds = Dataset.from_pandas(df[["text", "label", "date", "drift_event", "drift_provenance", "source"]], preserve_index=False)
-    return temporal_split(ds)
 
 
 _ARXIV_DATE_RE = re.compile(r"\]\s+(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})")

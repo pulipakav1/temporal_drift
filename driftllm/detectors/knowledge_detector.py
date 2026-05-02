@@ -15,15 +15,6 @@ FIN_PROBES: List[str] = [
     "Credit spreads often widen during risk-off periods.",
     "CPI is a common measure of inflation.",
 ]
-CLINICAL_PROBES: List[str] = [
-    "ICD coding maps clinical diagnoses to standardized codes.",
-    "Sepsis can progress rapidly and requires early intervention.",
-    "Antibiotic stewardship aims to reduce resistant infections.",
-    "Diabetes mellitus is associated with elevated blood glucose.",
-    "Hypertension is a risk factor for cardiovascular disease.",
-    "Clinical notes often contain temporal symptom trajectories.",
-    "MIMIC-III includes ICU patient records and outcomes.",
-]
 ARXIV_PROBES: List[str] = [
     "arXiv papers are organized into subject areas such as cs, math, and stat.",
     "An abstract usually summarizes the problem, method, and results of a paper.",
@@ -73,9 +64,8 @@ class KnowledgeDriftDetector(BaseDriftDetector):
             "agnews": AGNEWS_PROBES,
             "amazon": AMAZON_PROBES,
             "arxiv": ARXIV_PROBES,
-            "clinical": CLINICAL_PROBES,
         }
-        self.probes = probe_map.get(domain, CLINICAL_PROBES)
+        self.probes = probe_map.get(domain, FIN_PROBES)
         self.threshold_pct = threshold_pct
         self.hist = deque(maxlen=20)
 

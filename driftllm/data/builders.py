@@ -8,7 +8,6 @@ from driftllm.data.dataset import (
     load_amazon_dataset,
     load_arxiv_dataset,
     load_financial_dataset,
-    load_mimic_dataset,
     load_tweeteval_dataset,
 )
 
@@ -62,7 +61,7 @@ def build_domain_splits(cfg) -> Dict[str, object]:
         return load_amazon_dataset(cfg["paths"].get("amazon_cache", "./artifacts/data/amazon_hf"), seed=int(cfg["experiment"]["seed"]))
     if domain == "arxiv":
         return load_arxiv_dataset(cfg["paths"]["arxiv_cache"], seed=int(cfg["experiment"]["seed"]))
-    return load_mimic_dataset(cfg["paths"]["mimic_path"])
+    raise ValueError(f"Unknown domain: {domain}")
 
 
 def build_stream_loader(cfg, tokenizer, split: str = "test", batch_size: int = 1) -> DataLoader:

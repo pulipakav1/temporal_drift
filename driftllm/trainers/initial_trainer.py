@@ -21,7 +21,7 @@ class InitialTrainer:
             return int(self.cfg["model"].get("num_labels_amazon", self.cfg["model"]["num_labels_financial"]))
         if domain == "arxiv":
             return int(self.cfg["model"]["num_labels_arxiv"])
-        return int(self.cfg["model"]["num_labels_clinical"])
+        raise ValueError(f"Unknown domain: {domain}")
 
     def run(self):
         splits = build_domain_splits(self.cfg)

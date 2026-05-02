@@ -73,8 +73,6 @@ def build_command(args, domain, seed, exp):
         "--set",
         f"paths.tweet_cache={data_root}/tweeteval_hf",
         "--set",
-        f"paths.mimic_path={data_root}/mimic_iii.csv",
-        "--set",
         f"paths.plots_dir={plots_dir}",
     ]
     for item in exp["sets"]:

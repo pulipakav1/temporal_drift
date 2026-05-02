@@ -40,7 +40,7 @@ class OnlineDriftTrainer:
         elif domain == "arxiv":
             n_labels = int(cfg["model"]["num_labels_arxiv"])
         else:
-            n_labels = int(cfg["model"]["num_labels_clinical"])
+            raise ValueError(f"Unknown domain: {domain}")
         domain_defaults = cfg.get("drift", {}).get("domain_overrides", {}).get(domain, {})
         mmd_threshold = float(domain_defaults.get("mmd_threshold", cfg["drift"]["mmd_threshold"]))
         adwin_delta = float(domain_defaults.get("adwin_delta", cfg["drift"]["adwin_delta"]))
@@ -222,6 +222,9 @@ class OnlineDriftTrainer:
         }
         out = Path(self.cfg["paths"]["results_dir"])
         out.mkdir(parents=True, exist_ok=True)
-        with (out / "online_results.json").open("w", encoding="utf-8") as f:
+        seed = self.cfg["experiment"].get("seed", 0)
+        domain = self.cfg["experiment"].get("domain", "unknown")
+        fname = f"online_results_{domain}_{self.mode}_seed{seed}.json"
+        with (out / fname).open("w", encoding="utf-8") as f:
             json.dump(res, f, indent=2)
         return res

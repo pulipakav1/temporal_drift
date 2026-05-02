@@ -13,6 +13,13 @@ class ForgettingRegularizer:
         self.optimal_params = {}
 
     def consolidate(self, model, dataloader, device, n_samples: int = 256):
+        # Temporarily enable all LoRA grads so Fisher covers the full adapter set,
+        # even if freeze_all_lora() was called after the previous adaptation step.
+        frozen = {n for n, p in model.named_parameters() if "lora_" in n and not p.requires_grad}
+        for n, p in model.named_parameters():
+            if n in frozen:
+                p.requires_grad_(True)
+
         model.train()
         fisher = {n: torch.zeros_like(p, device=device) for n, p in model.named_parameters() if p.requires_grad}
         seen = 0
@@ -29,6 +36,11 @@ class ForgettingRegularizer:
             seen += int(batch["labels"].shape[0])
         self.fisher_diag = {n: f / max(1, seen) for n, f in fisher.items()}
         self.optimal_params = {n: deepcopy(p.detach()) for n, p in model.named_parameters() if n in self.fisher_diag}
+
+        # Restore the freeze state we found on entry.
+        for n, p in model.named_parameters():
+            if n in frozen:
+                p.requires_grad_(False)
         print("[EWC] consolidation complete")
 
     def ewc_loss(self, model):

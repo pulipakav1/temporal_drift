@@ -1,11 +1,13 @@
 import argparse
 import copy
+import gc
 import json
 import hashlib
 from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+import torch
 
 from driftllm.trainers.baseline_trainer import run_baselines
 from driftllm.trainers.initial_trainer import InitialTrainer
@@ -87,7 +89,14 @@ def main() -> None:
         run_cfg["experiment"]["seed"] = int(seed)
         seed_everything(int(seed))
         if args.mode in {"train", "full"}:
-            InitialTrainer(run_cfg).run()
+            initial_ckpt = Path(run_cfg["paths"]["model_dir"]) / "initial"
+            if initial_ckpt.exists():
+                print(f"[main] Skipping initial training — checkpoint found at {initial_ckpt}")
+            else:
+                InitialTrainer(run_cfg).run()
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
         method = "baseline" if args.baseline else args.method
         wb = _maybe_init_wandb(run_cfg, method=method, seed=int(seed))
         if args.baseline:

@@ -4,7 +4,6 @@ model:
   num_labels_agnews: 4
   num_labels_amazon: 3
   num_labels_tweeteval: 3
-  num_labels_clinical: 50
   num_labels_arxiv: 11
   bf16: true
   device_map: "auto"
@@ -53,6 +52,10 @@ drift:
       mmd_threshold: 0.015
       adwin_delta: 0.0005
       knowledge_threshold_pct: 0.12
+    amazon:
+      mmd_threshold: 0.02
+      adwin_delta: 0.001
+      knowledge_threshold_pct: 0.15
 
 layer_selection:
   method: "fisher"
@@ -84,7 +87,6 @@ paths:
   amazon_cache: "./artifacts/data/amazon_hf"
   tweet_cache: "./artifacts/data/tweeteval_hf"
   arxiv_cache: "./artifacts/data/arxiv_hf"
-  mimic_path: "./artifacts/data/mimic_iii.csv"
   model_dir: "./artifacts/models"
   results_dir: "./artifacts/results"
   plots_dir: "./artifacts/plots"
