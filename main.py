@@ -91,9 +91,19 @@ def main() -> None:
         if args.mode in {"train", "full"}:
             domain = run_cfg["experiment"]["domain"]
             initial_ckpt = Path(run_cfg["paths"]["model_dir"]) / domain / "initial"
-            if initial_ckpt.exists():
+            ckpt_cfg = initial_ckpt / "config.json"
+            ckpt_ok = initial_ckpt.exists() and ckpt_cfg.exists()
+            if ckpt_ok:
+                try:
+                    import json as _json
+                    ckpt_ok = "model_type" in _json.loads(ckpt_cfg.read_text())
+                except Exception:
+                    ckpt_ok = False
+            if ckpt_ok:
                 print(f"[main] Skipping initial training — checkpoint found at {initial_ckpt}")
             else:
+                if initial_ckpt.exists():
+                    print(f"[main] WARNING: checkpoint at {initial_ckpt} is invalid — retraining")
                 InitialTrainer(run_cfg).run()
             gc.collect()
             if torch.cuda.is_available():

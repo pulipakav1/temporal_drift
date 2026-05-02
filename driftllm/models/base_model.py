@@ -1,6 +1,18 @@
+import json
 import torch
 from pathlib import Path
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+
+def _valid_checkpoint(path: str) -> bool:
+    cfg_file = Path(path) / "config.json"
+    if not cfg_file.exists():
+        return False
+    try:
+        with cfg_file.open() as f:
+            return "model_type" in json.load(f)
+    except Exception:
+        return False
 
 
 def load_model_tokenizer(
@@ -20,7 +32,10 @@ def load_model_tokenizer(
         load_kwargs["low_cpu_mem_usage"] = False
     else:
         load_kwargs["device_map"] = device_map
-    model_source = checkpoint_dir if checkpoint_dir and Path(checkpoint_dir).exists() else model_name
+    ckpt_valid = checkpoint_dir and Path(checkpoint_dir).exists() and _valid_checkpoint(checkpoint_dir)
+    if checkpoint_dir and Path(checkpoint_dir).exists() and not ckpt_valid:
+        print(f"[base_model] WARNING: checkpoint at {checkpoint_dir} is invalid/incomplete — retraining from base model")
+    model_source = checkpoint_dir if ckpt_valid else model_name
     model = AutoModelForSequenceClassification.from_pretrained(model_source, **load_kwargs)
     tok = AutoTokenizer.from_pretrained(model_source, use_fast=True)
     if tok.pad_token is None:
