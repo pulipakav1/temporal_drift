@@ -9,8 +9,8 @@ COMMON = [
     "--config", "driftllm/configs/config.yaml",
     "--mode", "full",
     "--set", "experiment.stream_split=validation_test",
-    "--set", "model.name=Qwen/Qwen2.5-0.5B-Instruct",
-    "--set", "model.bf16=false",
+    "--set", "model.name=Qwen/Qwen2.5-7B-Instruct",
+    "--set", "model.bf16=true",
     "--set", "training.initial_epochs=1",
     "--set", "experiment.seeds=42",
     "--set", f"paths.model_dir={RESULTS_ROOT}/models",
@@ -21,9 +21,9 @@ COMMON = [
 ]
 
 FAST_ADAPT = [
-    "--set", "training.adaptation_steps=10",
-    "--set", "layer_selection.fisher_samples=16",
-    "--set", "forgetting.replay_buffer=64",
+    "--set", "training.adaptation_steps=50",
+    "--set", "layer_selection.fisher_samples=64",
+    "--set", "forgetting.replay_buffer=256",
 ]
 
 SEEDS = [42, 52, 62]
