@@ -13,7 +13,7 @@ def load_model_tokenizer(
 ):
     has_cuda = torch.cuda.is_available()
     dtype = torch.bfloat16 if (bf16 and has_cuda) else torch.float32
-    load_kwargs = {"torch_dtype": dtype, "num_labels": num_labels}
+    load_kwargs = {"dtype": dtype, "num_labels": num_labels}
     if materialize_for_peft:
         # Avoid meta/offload hooks that can break PEFT injection.
         load_kwargs["device_map"] = None

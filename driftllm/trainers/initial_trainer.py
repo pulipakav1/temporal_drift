@@ -41,7 +41,7 @@ class InitialTrainer:
         patience = int(self.cfg["training"]["early_stopping_patience"])
         best_val = -1.0
         bad_epochs = 0
-        out_dir = Path(self.cfg["paths"]["model_dir"]) / "initial"
+        out_dir = Path(self.cfg["paths"]["model_dir"]) / self.cfg["experiment"]["domain"] / "initial"
         out_dir.mkdir(parents=True, exist_ok=True)
         for epoch in range(int(self.cfg["training"].get("initial_epochs", 3))):
             model.train()

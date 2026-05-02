@@ -89,7 +89,8 @@ def main() -> None:
         run_cfg["experiment"]["seed"] = int(seed)
         seed_everything(int(seed))
         if args.mode in {"train", "full"}:
-            initial_ckpt = Path(run_cfg["paths"]["model_dir"]) / "initial"
+            domain = run_cfg["experiment"]["domain"]
+            initial_ckpt = Path(run_cfg["paths"]["model_dir"]) / domain / "initial"
             if initial_ckpt.exists():
                 print(f"[main] Skipping initial training — checkpoint found at {initial_ckpt}")
             else:

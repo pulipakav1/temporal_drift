@@ -22,7 +22,7 @@ class SelectiveLoRAModel:
         self.tokenizer = None
 
     def load(self, num_labels: int):
-        initial_dir = Path(self.cfg["paths"]["model_dir"]) / "initial"
+        initial_dir = Path(self.cfg["paths"]["model_dir"]) / self.cfg["experiment"]["domain"] / "initial"
         checkpoint_dir = str(initial_dir) if initial_dir.exists() else None
         self.model, self.tokenizer = load_model_tokenizer(
             self.cfg["model"]["name"],
