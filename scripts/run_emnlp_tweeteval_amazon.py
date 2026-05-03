@@ -21,7 +21,7 @@ COMMON = [
 ]
 
 FAST_ADAPT = [
-    "--set", "training.adaptation_steps=50",
+    "--set", "training.adaptation_steps=30",
     "--set", "layer_selection.fisher_samples=64",
     "--set", "forgetting.replay_buffer=256",
 ]

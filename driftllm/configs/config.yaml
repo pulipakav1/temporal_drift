@@ -24,7 +24,7 @@ training:
   early_stopping_patience: 5
   gradient_clip: 1.0
   checkpoint_every_steps: 500
-  adaptation_steps: 50
+  adaptation_steps: 30
   deepspeed:
     zero_optimization:
       stage: 3
