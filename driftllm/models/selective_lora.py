@@ -76,6 +76,16 @@ class SelectiveLoRAModel:
         logits = self.model(input_ids=input_ids, attention_mask=attention_mask).logits
         return logits, logits.argmax(dim=-1)
 
+    @torch.no_grad()
+    def predict_with_embedding(self, input_ids, attention_mask, layer_idx=-1):
+        out = self.model(
+            input_ids=input_ids, attention_mask=attention_mask, output_hidden_states=True, return_dict=True
+        )
+        hs = out.hidden_states[layer_idx]
+        mask = attention_mask.unsqueeze(-1)
+        emb = (hs * mask).sum(1) / mask.sum(1).clamp_min(1)
+        return out.logits, out.logits.argmax(dim=-1), emb
+
     def adapt_to_drift(self, drift_event, dataloader, n_steps):
         t0 = time.time()
         device = next(self.model.parameters()).device

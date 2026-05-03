@@ -17,6 +17,7 @@ lora:
 training:
   lr: 2.0e-4
   batch_size: 32
+  initial_batch_size: 32
   grad_accum: 4
   max_steps: 3000
   initial_epochs: 3

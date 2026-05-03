@@ -125,8 +125,8 @@ class OnlineDriftTrainer:
             try:
                 device = next(self.model.model.parameters()).device
                 model_batch = {k: v.to(device) for k, v in batch.items() if k in {"input_ids", "attention_mask", "labels"}}
-                _, preds = self.model.predict(model_batch["input_ids"], model_batch["attention_mask"])
-                emb = self.model.get_embedding(model_batch["input_ids"], model_batch["attention_mask"])[0].detach().cpu()
+                _, preds, emb_batch = self.model.predict_with_embedding(model_batch["input_ids"], model_batch["attention_mask"])
+                emb = emb_batch[0].detach().cpu()
                 label = int(model_batch["labels"][0].item())
                 pred = int(preds[0].item())
                 self.recent_true.append(label)
