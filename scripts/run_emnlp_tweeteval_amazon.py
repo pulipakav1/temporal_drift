@@ -1,9 +1,17 @@
+import argparse
 import os
 import time
 from datetime import datetime
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--domain", choices=["tweeteval", "amazon", "all"], default="all")
+parser.add_argument("--results_root", default=None)
+args = parser.parse_args()
+
 # ---------- Config ----------
-RESULTS_ROOT = "/content/drive/MyDrive/temporal_drift_results"
+RESULTS_ROOT = args.results_root or os.environ.get(
+    "RESULTS_ROOT", "/scratch/results/temporal_drift"
+)
 
 COMMON = [
     "--config", "driftllm/configs/config.yaml",
@@ -12,7 +20,6 @@ COMMON = [
     "--set", "model.name=Qwen/Qwen2.5-7B-Instruct",
     "--set", "model.bf16=true",
     "--set", "training.initial_epochs=3",
-    "--set", "experiment.seeds=42",
     "--set", f"paths.model_dir={RESULTS_ROOT}/models",
     "--set", f"paths.results_dir={RESULTS_ROOT}/results",
     "--set", f"paths.plots_dir={RESULTS_ROOT}/plots",
@@ -28,7 +35,7 @@ FAST_ADAPT = [
 
 SEEDS = [42, 52, 62]
 
-RUNS = [
+ALL_RUNS = [
     ("tweeteval", "selective"),
     ("tweeteval", "no_update"),
     ("tweeteval", "full_lora"),
@@ -36,6 +43,8 @@ RUNS = [
     ("amazon",    "no_update"),
     ("amazon",    "full_lora"),
 ]
+
+RUNS = ALL_RUNS if args.domain == "all" else [r for r in ALL_RUNS if r[0] == args.domain]
 # ---------------------------
 
 
@@ -53,8 +62,10 @@ durations = []
 results = []
 
 total = len(RUNS) * len(SEEDS)
+domains = sorted({r[0] for r in RUNS})
 print(f"Starting {total} runs ({len(RUNS)} configs × {len(SEEDS)} seeds)")
-print(f"Domains: tweeteval, amazon  |  Methods: selective, no_update, full_lora")
+print(f"Domains: {', '.join(domains)}  |  Methods: selective, no_update, full_lora")
+print(f"Results root: {RESULTS_ROOT}")
 print(f"Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
 run_idx = 0
