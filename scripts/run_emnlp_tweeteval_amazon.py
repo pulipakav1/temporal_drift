@@ -1,18 +1,25 @@
 import argparse
 import os
 import subprocess
+import sys
 import time
 from datetime import datetime
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--domain", choices=["tweeteval", "amazon", "all"], default="all")
 parser.add_argument("--results_root", default=None)
 args = parser.parse_args()
 
-# ---------- Config ----------
-RESULTS_ROOT = args.results_root or os.environ.get(
-    "RESULTS_ROOT", "/scratch/results/temporal_drift"
-)
+# Default: repo artifacts/ so local runs land next to the project. Set RESULTS_ROOT or --results_root for HPC scratch.
+RESULTS_ROOT = args.results_root or os.environ.get("RESULTS_ROOT", str(_REPO_ROOT / "artifacts"))
+RESULTS_ROOT = str(Path(RESULTS_ROOT).expanduser().resolve())
+
+_root = Path(RESULTS_ROOT)
+for sub in ("results", "models", "plots", "data"):
+    (_root / sub).mkdir(parents=True, exist_ok=True)
 
 COMMON = [
     "--config", "driftllm/configs/config.yaml",
@@ -82,6 +89,7 @@ print(f"Distributed mode: rank {rank}/{world_size} (local_rank={local_rank})")
 print(f"Starting {total} local runs ({len(rank_runs)} configs × {len(SEEDS)} seeds)")
 print(f"Domains: {', '.join(domains)}  |  Methods: selective, no_update, full_lora")
 print(f"Results root: {RESULTS_ROOT}")
+print(f"Per-run JSON (online + aggregated): {Path(RESULTS_ROOT) / 'results'}")
 print(f"Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
 run_idx = 0
@@ -91,7 +99,8 @@ for domain, method in rank_runs:
         tag = f"emnlp_{domain}_{method}_seed{seed}"
 
         cmd_parts = [
-            "python", "main.py",
+            sys.executable,
+            str(_REPO_ROOT / "main.py"),
             "--method", method,
             "--tag", tag,
             "--set", f"experiment.domain={domain}",
@@ -105,7 +114,7 @@ for domain, method in rank_runs:
         start = time.time()
         env = os.environ.copy()
         env["CUDA_VISIBLE_DEVICES"] = str(local_rank)
-        proc = subprocess.run(cmd_parts, env=env)
+        proc = subprocess.run(cmd_parts, env=env, cwd=str(_REPO_ROOT))
         code = int(proc.returncode)
         elapsed = time.time() - start
 
@@ -136,4 +145,5 @@ for tag, code, elapsed in results:
         fail += 1
 print("-" * 70)
 print(f"  {ok}/{total} successful  |  Total: {fmt(total_elapsed)}")
+print(f"JSON output directory: {Path(RESULTS_ROOT) / 'results'}")
 print("=" * 70)

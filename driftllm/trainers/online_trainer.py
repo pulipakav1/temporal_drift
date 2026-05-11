@@ -121,49 +121,54 @@ class OnlineDriftTrainer:
         if stream_loader is None:
             split = self.cfg["experiment"].get("stream_split", "test")
             stream_loader = build_stream_loader(self.cfg, self.model.tokenizer, split=split, batch_size=1)
-        for step, batch in enumerate(stream_loader, start=1):
-            try:
-                device = next(self.model.model.parameters()).device
-                model_batch = {k: v.to(device) for k, v in batch.items() if k in {"input_ids", "attention_mask", "labels"}}
-                _, preds, emb_batch = self.model.predict_with_embedding(model_batch["input_ids"], model_batch["attention_mask"])
-                emb = emb_batch[0].detach().cpu()
-                label = int(model_batch["labels"][0].item())
-                pred = int(preds[0].item())
-                self.recent_true.append(label)
-                self.recent_pred.append(pred)
-                self.global_true.append(label)
-                self.global_pred.append(pred)
-                sample = {k: v[0].detach().cpu() for k, v in model_batch.items()}
-                self.forgetting.add_to_replay(sample)
-                self.buffer.append(sample)
-                self._drift_eval_buffer.append({"step": step, "pred": pred, "gt_event": batch["drift_event"][0]})
-                if batch["drift_event"][0] != "none" and batch["drift_event"][0] in self._event_type_map:
-                    self._gt_drift_events.append(
-                        {"step": step, "drift_type": self._event_type_map[batch["drift_event"][0]], "name": batch["drift_event"][0]}
-                    )
-                ppl = None
-                if step % 500 == 0:
-                    ppl = self.orch.knowledge.compute_probe_perplexity(self.model.model, self.model.tokenizer, device)
-                event = self.orch.update(step, embedding=emb, pred_label=pred, ppl=ppl)
-                if self.mode == "oracle" and step % 200 == 0 and event is None:
-                    from driftllm.detectors.base_detector import DriftEvent
+        try:
+            for step, batch in enumerate(stream_loader, start=1):
+                try:
+                    device = next(self.model.model.parameters()).device
+                    model_batch = {k: v.to(device) for k, v in batch.items() if k in {"input_ids", "attention_mask", "labels"}}
+                    _, preds, emb_batch = self.model.predict_with_embedding(model_batch["input_ids"], model_batch["attention_mask"])
+                    emb = emb_batch[0].detach().cpu()
+                    label = int(model_batch["labels"][0].item())
+                    pred = int(preds[0].item())
+                    self.recent_true.append(label)
+                    self.recent_pred.append(pred)
+                    self.global_true.append(label)
+                    self.global_pred.append(pred)
+                    sample = {k: v[0].detach().cpu() for k, v in model_batch.items()}
+                    self.forgetting.add_to_replay(sample)
+                    self.buffer.append(sample)
+                    self._drift_eval_buffer.append({"step": step, "pred": pred, "gt_event": batch["drift_event"][0]})
+                    if batch["drift_event"][0] != "none" and batch["drift_event"][0] in self._event_type_map:
+                        self._gt_drift_events.append(
+                            {"step": step, "drift_type": self._event_type_map[batch["drift_event"][0]], "name": batch["drift_event"][0]}
+                        )
+                    ppl = None
+                    if step % 500 == 0:
+                        ppl = self.orch.knowledge.compute_probe_perplexity(self.model.model, self.model.tokenizer, device)
+                    event = self.orch.update(step, embedding=emb, pred_label=pred, ppl=ppl)
+                    if self.mode == "oracle" and step % 200 == 0 and event is None:
+                        from driftllm.detectors.base_detector import DriftEvent
 
-                    event = DriftEvent(step=step, drift_type="knowledge_drift", score=1.0, threshold=0.0, severity=1.0, detector="oracle")
-                if event:
-                    if event.detector == "oracle":
-                        self.metrics["detector_fire_counts"]["oracle"] += 1
-                    elif event.drift_type in self.metrics["detector_fire_counts"]:
-                        self.metrics["detector_fire_counts"][event.drift_type] += 1
-                    self._handle_drift_event(event)
-                    self._post_event_rolling_acc.append(float(np.mean(np.array(self.recent_true) == np.array(self.recent_pred))) if len(self.recent_true) > 0 else 0.0)
-                self._log_rolling_metrics(step)
-                self.run_state["steps_completed"] = step
-                if step % int(self.cfg["training"].get("checkpoint_every_steps", 500)) == 0:
-                    self._save_checkpoint(step)
-            except Exception as exc:
-                self._save_checkpoint(step, error=str(exc))
-                raise
-        return self._compile_results()
+                        event = DriftEvent(step=step, drift_type="knowledge_drift", score=1.0, threshold=0.0, severity=1.0, detector="oracle")
+                    if event:
+                        if event.detector == "oracle":
+                            self.metrics["detector_fire_counts"]["oracle"] += 1
+                        elif event.drift_type in self.metrics["detector_fire_counts"]:
+                            self.metrics["detector_fire_counts"][event.drift_type] += 1
+                        self._handle_drift_event(event)
+                        self._post_event_rolling_acc.append(float(np.mean(np.array(self.recent_true) == np.array(self.recent_pred))) if len(self.recent_true) > 0 else 0.0)
+                    self._log_rolling_metrics(step)
+                    self.run_state["steps_completed"] = step
+                    if step % int(self.cfg["training"].get("checkpoint_every_steps", 500)) == 0:
+                        self._save_checkpoint(step)
+                except Exception as exc:
+                    self._save_checkpoint(step, error=str(exc))
+                    raise
+            return self._compile_results()
+        except Exception:
+            if int(self.run_state.get("steps_completed", 0)) > 0:
+                self._compile_results(suffix="_partial")
+            raise
 
     def _save_checkpoint(self, step: int, error: str = ""):
         payload = {
@@ -175,7 +180,7 @@ class OnlineDriftTrainer:
         with (self.ckpt_dir / f"online_step_{step}.json").open("w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2)
 
-    def _compile_results(self):
+    def _compile_results(self, suffix: str = ""):
         y, p = self.global_true, self.global_pred
         f1_macro = float(f1_score(y, p, average="macro")) if y else 0.0
         _, _, f1_weighted, _ = precision_recall_fscore_support(y, p, average="weighted", zero_division=0) if y else (0, 0, 0, 0)
@@ -220,11 +225,15 @@ class OnlineDriftTrainer:
             "forgetting_bound_violation_count": int(sum(1 for e in self.metrics["drift_events"] if e.get("bound_violated", False))),
             "recovery_speed_steps_to_90pct": int(recovery),
         }
-        out = Path(self.cfg["paths"]["results_dir"])
+        out = Path(self.cfg["paths"]["results_dir"]).resolve()
         out.mkdir(parents=True, exist_ok=True)
         seed = self.cfg["experiment"].get("seed", 0)
         domain = self.cfg["experiment"].get("domain", "unknown")
-        fname = f"online_results_{domain}_{self.mode}_seed{seed}.json"
-        with (out / fname).open("w", encoding="utf-8") as f:
+        fname = f"online_results_{domain}_{self.mode}_seed{seed}{suffix}.json"
+        path = out / fname
+        if suffix:
+            res["partial_run"] = True
+        with path.open("w", encoding="utf-8") as f:
             json.dump(res, f, indent=2)
+        print(f"[online] Wrote metrics to {path}" + (" (partial)" if suffix else ""))
         return res

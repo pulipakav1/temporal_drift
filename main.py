@@ -150,13 +150,14 @@ def main() -> None:
                 agg[method][k] = {"mean": float(np.mean(vals)), "std": float(np.std(vals))}
     results = {"runs": runs, "aggregate": agg}
 
-    if args.mode in {"eval", "full"}:
-        out = Path(cfg["paths"]["results_dir"])
+    if runs:
+        out = Path(cfg["paths"]["results_dir"]).resolve()
         out.mkdir(parents=True, exist_ok=True)
         cfg_hash = hashlib.md5(json.dumps(cfg, sort_keys=True).encode("utf-8")).hexdigest()[:8]
         out_file = out / f"run_results_{args.tag}_{cfg_hash}.json"
         with out_file.open("w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, default=str)
+        print(f"[main] Wrote aggregated results to {out_file}")
 
 
 if __name__ == "__main__":
