@@ -1,0 +1,33 @@
+Distributed mode: rank 2/4 (local_rank=2)Distributed mode: rank 3/4 (local_rank=3)Distributed mode: rank 0/4 (local_rank=0)Distributed mode: rank 1/4 (local_rank=1)
+
+
+
+Starting 3 local runs (1 configs × 3 seeds)Starting 6 local runs (2 configs × 3 seeds)Starting 3 local runs (1 configs × 3 seeds)
+Starting 6 local runs (2 configs × 3 seeds)
+
+Domains: tweeteval  |  Methods: selective, no_update, full_lora
+Domains: amazon, tweeteval  |  Methods: selective, no_update, full_loraDomains: amazon  |  Methods: selective, no_update, full_lora
+
+Domains: amazon, tweeteval  |  Methods: selective, no_update, full_lora
+Results root: /nfs/storage1/home/pulipakv/temporal_drift/artifactsResults root: /nfs/storage1/home/pulipakv/temporal_drift/artifacts
+Results root: /nfs/storage1/home/pulipakv/temporal_drift/artifacts
+
+Results root: /nfs/storage1/home/pulipakv/temporal_drift/artifacts
+
+Per-run JSON (online + aggregated): /nfs/storage1/home/pulipakv/temporal_drift/artifacts/resultsPer-run JSON (online + aggregated): /nfs/storage1/home/pulipakv/temporal_drift/artifacts/results
+Per-run JSON (online + aggregated): /nfs/storage1/home/pulipakv/temporal_drift/artifacts/results
+Per-run JSON (online + aggregated): /nfs/storage1/home/pulipakv/temporal_drift/artifacts/results
+
+Started at 2026-05-11 14:32:33
+Started at 2026-05-11 14:32:33
+Started at 2026-05-11 14:32:33
+
+
+Started at 2026-05-11 14:32:33
+
+
+[1/3] emnlp_tweeteval_full_lora_seed42[1/3] emnlp_amazon_selective_seed42
+
+[1/6] emnlp_tweeteval_selective_seed42[1/6] emnlp_tweeteval_no_update_seed42
+
+[amazon] split sizes train=34160 validation=13070 test=2770
