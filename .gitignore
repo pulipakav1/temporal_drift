@@ -10,13 +10,9 @@ __pycache__/
 .venv/
 venv/
 env/
+artifacts/models/
 
 # Local/generated experiment outputs
-artifacts/data/
-artifacts/models/
-artifacts/results/
-artifacts/checkpoints/
-artifacts/plots/
 
 # Versioned run summaries live under results/ (JSON only). Never commit weights.
 results/**/models/

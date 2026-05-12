@@ -1,0 +1,477 @@
+{
+  "runs": [
+    {
+      "seed": 62,
+      "result": {
+        "method": "full_lora",
+        "overall_accuracy": 0.6106904231625835,
+        "f1_macro": 0.6036019029551878,
+        "f1_weighted": 0.6107815573731213,
+        "drift_events": [
+          {
+            "step": 5500,
+            "drift_type": "knowledge_drift",
+            "severity": 0.19999999999999996,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 5.135453963434832e-06,
+            "bound_violated": false,
+            "timing": 60.34117841720581,
+            "avg_loss": 1.1354820085068544,
+            "n_layers_updated": 84,
+            "n_params_updated": 18579456,
+            "pct_lora_params_updated": 0.4602272727272727
+          },
+          {
+            "step": 6500,
+            "drift_type": "knowledge_drift",
+            "severity": 0.14152639029849567,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.433716773986816,
+            "avg_loss": 1.3368495941162108,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 7632,
+            "drift_type": "label_drift",
+            "severity": 0.31579944491386414,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.578251123428345,
+            "avg_loss": 1.2609351913134257,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 8980,
+            "drift_type": "label_drift",
+            "severity": 0.3863997459411621,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.48968148231506,
+            "avg_loss": 1.1293709675470989,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 9406,
+            "drift_type": "label_drift",
+            "severity": 0.6404199600219727,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.63304615020752,
+            "avg_loss": 1.3795420130093892,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 11270,
+            "drift_type": "label_drift",
+            "severity": 0.38423851132392883,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.47140836715698,
+            "avg_loss": 1.1714386661847433,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 14408,
+            "drift_type": "label_drift",
+            "severity": 0.4229188859462738,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.480138301849365,
+            "avg_loss": 1.2771515210469564,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 23906,
+            "drift_type": "label_drift",
+            "severity": 0.3657643496990204,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.46291995048523,
+            "avg_loss": 1.4127264897028604,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 24265,
+            "drift_type": "label_drift",
+            "severity": 0.46666663885116577,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.62035918235779,
+            "avg_loss": 1.5864521582921347,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 26000,
+            "drift_type": "knowledge_drift",
+            "severity": 0.13509414441566212,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.4026358127594,
+            "avg_loss": 1.3363840341567994,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 26500,
+            "drift_type": "knowledge_drift",
+            "severity": 0.16652720090678072,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.462501764297485,
+            "avg_loss": 1.2169418295224508,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 27000,
+            "drift_type": "knowledge_drift",
+            "severity": 0.199790801360171,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.4440484046936,
+            "avg_loss": 1.4390573660532633,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 27500,
+            "drift_type": "knowledge_drift",
+            "severity": 0.22761506958670313,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.44712257385254,
+            "avg_loss": 1.328625758488973,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 28000,
+            "drift_type": "knowledge_drift",
+            "severity": 0.25910042573777875,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.47757840156555,
+            "avg_loss": 1.2659441192944845,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 28452,
+            "drift_type": "label_drift",
+            "severity": 0.37637555599212646,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.57411551475525,
+            "avg_loss": 1.3188287695248921,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 29000,
+            "drift_type": "knowledge_drift",
+            "severity": 0.2864016861919848,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.68625855445862,
+            "avg_loss": 1.4363311211268106,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 29382,
+            "drift_type": "label_drift",
+            "severity": 0.5381526947021484,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.7915723323822,
+            "avg_loss": 1.3281887888908386,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 29897,
+            "drift_type": "label_drift",
+            "severity": 0.5740741491317749,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.760934591293335,
+            "avg_loss": 1.3174846371014912,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 30500,
+            "drift_type": "knowledge_drift",
+            "severity": 0.3168410156256547,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.76313543319702,
+            "avg_loss": 1.4361023664474488,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 31000,
+            "drift_type": "knowledge_drift",
+            "severity": 0.34346235815490905,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.82023906707764,
+            "avg_loss": 1.1951734284559885,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 31500,
+            "drift_type": "knowledge_drift",
+            "severity": 0.27080728173098795,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.78616213798523,
+            "avg_loss": 1.3145109057426452,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 31956,
+            "drift_type": "label_drift",
+            "severity": 0.3553495407104492,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.79324817657471,
+            "avg_loss": 1.3467888832092285,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 32333,
+            "drift_type": "label_drift",
+            "severity": 0.20512820780277252,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.83640384674072,
+            "avg_loss": 1.2144240895907084,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 32929,
+            "drift_type": "label_drift",
+            "severity": 0.39057236909866333,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.748701095581055,
+            "avg_loss": 1.2451559066772462,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 33500,
+            "drift_type": "knowledge_drift",
+            "severity": 0.2028116450452848,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.72551107406616,
+            "avg_loss": 1.3498173753420513,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          },
+          {
+            "step": 34000,
+            "drift_type": "knowledge_drift",
+            "severity": 0.14928813019857842,
+            "forgetting_delta": 0.0,
+            "theoretical_bound": 0.0,
+            "bound_violated": false,
+            "timing": 38.74456524848938,
+            "avg_loss": 1.237084690729777,
+            "n_layers_updated": 0,
+            "n_params_updated": 0,
+            "pct_lora_params_updated": 0.0
+          }
+        ],
+        "avg_adaptation_loss": 1.308338180002876,
+        "avg_post_event_rolling_accuracy": 0.6096153846153846,
+        "mean_forgetting": 0.0,
+        "n_param_updates": 84,
+        "total_adapt_time_seconds": 1025.7754337787628,
+        "drift_detection_precision": 0.0,
+        "drift_detection_recall": 0.0,
+        "drift_detection_f1": 0.0,
+        "drift_detection_tp": 0,
+        "drift_detection_fp": 26,
+        "drift_detection_fn": 265,
+        "mean_detection_delay_steps": -1.0,
+        "drift_detection_per_type": {
+          "semantic_drift": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "mean_detection_delay_steps": -1.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 113
+          },
+          "label_drift": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "mean_detection_delay_steps": -1.0,
+            "tp": 0,
+            "fp": 13,
+            "fn": 0
+          },
+          "knowledge_drift": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "mean_detection_delay_steps": -1.0,
+            "tp": 0,
+            "fp": 13,
+            "fn": 152
+          }
+        },
+        "detector_fire_counts": {
+          "semantic_drift": 0,
+          "label_drift": 13,
+          "knowledge_drift": 13,
+          "oracle": 0
+        },
+        "forgetting_bound_violation_rate": 0.0,
+        "forgetting_bound_violation_count": 0,
+        "recovery_speed_steps_to_90pct": 0
+      }
+    }
+  ],
+  "aggregate": {
+    "overall_accuracy": {
+      "mean": 0.6106904231625835,
+      "std": 0.0
+    },
+    "f1_macro": {
+      "mean": 0.6036019029551878,
+      "std": 0.0
+    },
+    "f1_weighted": {
+      "mean": 0.6107815573731213,
+      "std": 0.0
+    },
+    "avg_adaptation_loss": {
+      "mean": 1.308338180002876,
+      "std": 0.0
+    },
+    "avg_post_event_rolling_accuracy": {
+      "mean": 0.6096153846153846,
+      "std": 0.0
+    },
+    "mean_forgetting": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "n_param_updates": {
+      "mean": 84.0,
+      "std": 0.0
+    },
+    "total_adapt_time_seconds": {
+      "mean": 1025.7754337787628,
+      "std": 0.0
+    },
+    "drift_detection_precision": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_recall": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_f1": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_tp": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_fp": {
+      "mean": 26.0,
+      "std": 0.0
+    },
+    "drift_detection_fn": {
+      "mean": 265.0,
+      "std": 0.0
+    },
+    "mean_detection_delay_steps": {
+      "mean": -1.0,
+      "std": 0.0
+    },
+    "forgetting_bound_violation_rate": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "forgetting_bound_violation_count": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "recovery_speed_steps_to_90pct": {
+      "mean": 0.0,
+      "std": 0.0
+    }
+  }
+}

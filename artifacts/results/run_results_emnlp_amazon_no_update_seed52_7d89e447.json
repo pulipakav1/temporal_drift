@@ -1,0 +1,138 @@
+{
+  "runs": [
+    {
+      "seed": 52,
+      "result": {
+        "method": "no_update",
+        "overall_accuracy": 0.8852272727272728,
+        "f1_macro": 0.6541818016992167,
+        "f1_weighted": 0.8818302756953836,
+        "drift_events": [],
+        "avg_adaptation_loss": 0.0,
+        "avg_post_event_rolling_accuracy": 0.9,
+        "mean_forgetting": 0.0,
+        "n_param_updates": 0,
+        "total_adapt_time_seconds": 0.0,
+        "drift_detection_precision": 0.0,
+        "drift_detection_recall": 0.0,
+        "drift_detection_f1": 0.0,
+        "drift_detection_tp": 0,
+        "drift_detection_fp": 0,
+        "drift_detection_fn": 265,
+        "mean_detection_delay_steps": -1.0,
+        "drift_detection_per_type": {
+          "semantic_drift": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "mean_detection_delay_steps": -1.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 158
+          },
+          "label_drift": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "mean_detection_delay_steps": -1.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0
+          },
+          "knowledge_drift": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "mean_detection_delay_steps": -1.0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 107
+          }
+        },
+        "detector_fire_counts": {
+          "semantic_drift": 0,
+          "label_drift": 0,
+          "knowledge_drift": 2,
+          "oracle": 0
+        },
+        "forgetting_bound_violation_rate": 0.0,
+        "forgetting_bound_violation_count": 0,
+        "recovery_speed_steps_to_90pct": 0
+      }
+    }
+  ],
+  "aggregate": {
+    "overall_accuracy": {
+      "mean": 0.8852272727272728,
+      "std": 0.0
+    },
+    "f1_macro": {
+      "mean": 0.6541818016992167,
+      "std": 0.0
+    },
+    "f1_weighted": {
+      "mean": 0.8818302756953836,
+      "std": 0.0
+    },
+    "avg_adaptation_loss": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "avg_post_event_rolling_accuracy": {
+      "mean": 0.9,
+      "std": 0.0
+    },
+    "mean_forgetting": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "n_param_updates": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "total_adapt_time_seconds": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_precision": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_recall": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_f1": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_tp": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_fp": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "drift_detection_fn": {
+      "mean": 265.0,
+      "std": 0.0
+    },
+    "mean_detection_delay_steps": {
+      "mean": -1.0,
+      "std": 0.0
+    },
+    "forgetting_bound_violation_rate": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "forgetting_bound_violation_count": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "recovery_speed_steps_to_90pct": {
+      "mean": 0.0,
+      "std": 0.0
+    }
+  }
+}
